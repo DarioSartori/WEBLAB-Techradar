@@ -1,0 +1,19 @@
+# Node/Angular
+node_modules/
+dist/
+.angular/
+coverage/
+# Cypress
+cypress/videos/
+cypress/screenshots/
+# .NET
+bin/
+obj/
+*.user
+*.suo
+*.swp
+# OS/IDE
+.DS_Store
+Thumbs.db
+.vscode/
+.idea/
