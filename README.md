@@ -6,11 +6,12 @@ Der Umfang wird nicht angepasst
 
 ## Tech-Stack
 
-**Frontend:** Angular  
-**Backend:** NestJS 
-**Datenbank:** PostgreSQL + Prisma
-**Auth:** JWT  
-**Testing:** Cypress + Jest
+
+- **Frontend:** Angular
+- **Backend:** NestJS
+- **Datenbank:** PostgreSQL + Prisma
+- **Auth:** JWT
+- **Testing:** Cypress + Jest
 
 ## Struktur
 - frontend/ – Angular App
