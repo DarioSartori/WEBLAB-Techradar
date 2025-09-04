@@ -7,12 +7,12 @@ Der Umfang wird nicht angepasst
 ## Tech-Stack
 
 **Frontend:** Angular  
-**Backend:** ASP.NET Core  
-**Datenbank:** PostgreSQL  
+**Backend:** NestJS 
+**Datenbank:** PostgreSQL + Prisma
 **Auth:** JWT  
-**Testing:** Cypress (E2E) + xUnit (.NET)
+**Testing:** Cypress + Jest
 
 ## Struktur
 - frontend/ – Angular App
-- backend/  – ASP.NET Core API + Tests (xUnit)
+- backend/  – NestJS API + Tests (Jest)
 - cypress/  – Cypress E2E-Tests
