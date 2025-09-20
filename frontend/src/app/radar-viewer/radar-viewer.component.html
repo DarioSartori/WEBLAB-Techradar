@@ -1,0 +1,35 @@
+<h2>Technologie-Radar</h2>
+
+<div *ngIf="loading">Loading...</div>
+<div *ngIf="error">{{ error }}</div>
+
+<div *ngIf="!loading && !error">
+  <div
+    *ngFor="
+      let cat of ['Techniques', 'Platforms', 'Tools', 'LanguagesFrameworks']
+    "
+    [attr.data-cy]="'category-' + cat"
+  >
+    <h3>{{ cat }}</h3>
+    <table>
+      <tbody>
+        <tr
+          *ngFor="let ring of ['Assess', 'Trial', 'Adopt', 'Hold']"
+          [attr.data-cy]="'ring-' + ring"
+        >
+          <td>
+            <strong>{{ ring }}</strong>
+          </td>
+          <td>
+            <ng-container *ngIf="data[cat][ring]?.length; else empty">
+              <span *ngFor="let t of data[cat][ring]; let last = last">
+                {{ t.name }}<span *ngIf="!last">, </span>
+              </span>
+            </ng-container>
+            <ng-template #empty>–</ng-template>
+          </td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+</div>

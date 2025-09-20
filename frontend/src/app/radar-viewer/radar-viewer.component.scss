@@ -1,0 +1,21 @@
+h2 { margin: 0 0 1rem; }
+h3 { margin: 1.5rem 0 .5rem; }
+
+table {
+  width: 100%;
+  border-collapse: collapse;
+  table-layout: fixed;      // ← alle Spalten gleich breit
+}
+
+th, td {
+  border: 1px solid #e5e7eb;
+  padding: .5rem .75rem;
+  vertical-align: top;
+  width: 50%;               // ← zwei Spalten → 50%/50%
+  word-wrap: break-word;    // lange Texte umbrechen
+}
+
+thead th {
+  background: #f3f4f6;
+  text-align: left;
+}
