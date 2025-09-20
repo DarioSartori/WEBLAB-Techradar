@@ -6,10 +6,33 @@
 
 generator client {
   provider = "prisma-client-js"
-  output   = "../generated/prisma"
 }
 
 datasource db {
   provider = "postgresql"
   url      = env("DATABASE_URL")
+}
+
+enum Category {
+  Techniques
+  Platforms
+  Tools
+  LanguagesFrameworks
+}
+
+enum Ring {
+  Assess
+  Trial
+  Adopt
+  Hold
+}
+
+model Technology {
+  id              String   @id @default(uuid())
+  name            String
+  category        Category
+  ring            Ring
+  techDescription String
+  ringDescription String
+  createdAt       DateTime @default(now())
 }
