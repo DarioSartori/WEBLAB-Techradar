@@ -1,55 +1,54 @@
 import { INestApplication, ValidationPipe } from '@nestjs/common';
 import { Test } from '@nestjs/testing';
 import * as request from 'supertest';
-import { TechnologiesModule } from '../src/technologies/technologies.module';
+import { TechnologiesController } from '../src/technologies/technologies.controller';
+import { TechnologiesService } from '../src/technologies/technologies.service';
 
-const prismaStub = {
-  technology: { create: jest.fn().mockResolvedValue({ id: 'uuid', createdAt: new Date() }) },
-};
-
-describe('POST /technologies', () => {
+describe('TechnologiesController', () => {
   let app: INestApplication;
+  const service = {
+    create: jest.fn().mockResolvedValue({ id: '1' }),
+    publish: jest.fn().mockResolvedValue({ id: '1', publishedAt: new Date().toISOString() }),
+  } as Partial<TechnologiesService>;
 
   beforeAll(async () => {
-    const moduleRef = await Test.createTestingModule({
-      imports: [TechnologiesModule],
-    })
-      .overrideProvider('PrismaClient' as any)
-      .useValue(prismaStub)
-      .compile();
+    const mod = await Test.createTestingModule({
+      controllers: [TechnologiesController],
+      providers: [{ provide: TechnologiesService, useValue: service }],
+    }).compile();
 
-    app = moduleRef.createNestApplication();
-    app.useGlobalPipes(new ValidationPipe({ whitelist: true, forbidNonWhitelisted: true }));
+    app = mod.createNestApplication();
+    app.useGlobalPipes(new ValidationPipe({ whitelist: true, transform: true, forbidNonWhitelisted: true }));
     await app.init();
   });
 
-  afterAll(async () => {
-    await app.close();
-  });
+  afterAll(async () => app.close());
 
-  it('201 if payload id valid', async () => {
+  it('POST /technologies -> 201 (Draft, ring optional)', async () => {
     await request(app.getHttpServer())
       .post('/technologies')
-      .send({
-        name: 'ArgoCD',
-        category: 'Tools',
-        ring: 'Trial',
-        techDescription: 'Argo CD is declarative...',
-        ringDescription: 'Without making a judgment...',
-      })
+      .send({ name: 'X', category: 'Tools', techDescription: 'desc' })
       .expect(201);
   });
 
-  it('400 if required field missing', async () => {
+  it('POST /technologies -> 400 if required field missing', async () => {
     await request(app.getHttpServer())
       .post('/technologies')
-      .send({
-        // name fehlt
-        category: 'Tools',
-        ring: 'Trial',
-        techDescription: '1234567890',
-        ringDescription: '1234567890',
-      })
+      .send({ category: 'Tools', techDescription: 'desc' })
       .expect(400);
+  });
+
+  it('PATCH /technologies/:id/publish -> 400 if required fields missing', async () => {
+    await request(app.getHttpServer())
+      .patch('/technologies/1/publish')
+      .send({ ring: 'Trial' })
+      .expect(400);
+  });
+
+  it('PATCH /technologies/:id/publish -> 200 with  ring + ringDescription', async () => {
+    await request(app.getHttpServer())
+      .patch('/technologies/1/publish')
+      .send({ ring: 'Trial', ringDescription: 'Description' })
+      .expect(200);
   });
 });

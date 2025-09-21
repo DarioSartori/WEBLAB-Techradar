@@ -1,0 +1,36 @@
+.form {
+  max-width: 720px;
+  margin: 0 auto;
+  display: grid;
+  gap: 1rem;
+
+  input, select, textarea {
+    width: 100%;
+    padding: .5rem .75rem;
+    border: 1px solid #d1d5db;
+    border-radius: .5rem;
+    font-size: 1rem;
+
+    &:focus {
+      outline: none;
+      border-color: #2563eb;
+      box-shadow: 0 0 0 2px rgba(37, 99, 235, 0.25);
+    }
+  }
+
+  textarea { min-height: 7rem; }
+
+  button[type="submit"] {
+    justify-self: start;
+    background: #2563eb;
+    color: #fff;
+    border: none;
+    padding: .5rem 1rem;
+    border-radius: .5rem;
+    font-weight: 600;
+    cursor: pointer;
+
+    &:hover { background: #1d4ed8; }
+    &:disabled { opacity: .5; cursor: not-allowed; }
+  }
+}

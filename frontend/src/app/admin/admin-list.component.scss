@@ -1,0 +1,101 @@
+.toolbar {
+  display: flex;
+  gap: .5rem;
+  margin-bottom: .75rem;
+
+  button {
+    padding: .4rem .7rem;
+    border: 1px solid #d1d5db;
+    background: #fff;
+    border-radius: .5rem;
+    cursor: pointer;
+  }
+  .primary {
+    background: #2563eb;
+    color: #fff;
+    border-color: #2563eb;
+  }
+}
+
+table {
+  width: 100%;
+  border-collapse: collapse;
+  table-layout: fixed;
+}
+
+th, td {
+  border: 1px solid #e5e7eb;
+  padding: .5rem .75rem;
+  width: 20%;
+  word-wrap: break-word;
+}
+
+thead th {
+  background: #f3f4f6;
+  text-align: left;
+}
+
+.badge {
+  display: inline-block;
+  padding: .125rem .5rem;
+  border-radius: .5rem;
+  font-size: .85rem;
+
+  &.draft { background: #fde68a; }
+  &.published { background: #bbf7d0; }
+}
+
+.dialog {
+  position: fixed;
+  inset: 0;
+  z-index: 1000;
+
+  background-color: rgba(0, 0, 0, 0.45);
+
+  display: grid;
+  place-items: center;
+}
+
+.panel {
+  background: #fff;
+  color: #111;
+  width: min(92vw, 560px);
+  border-radius: 12px;
+  box-shadow: 0 10px 30px rgba(0,0,0,.25);
+  padding: 16px;
+
+  h3 { margin: 0 0 12px; }
+
+  label {
+    display: block;
+    font-weight: 600;
+    margin: 10px 0 6px;
+  }
+
+  select, textarea {
+    width: 100%;
+    border: 1px solid #d1d5db;
+    border-radius: 8px;
+    padding: 8px 10px;
+    background: #fff;
+  }
+
+  textarea { min-height: 120px; }
+
+  .actions {
+    display: flex;
+    gap: 8px;
+    justify-content: flex-end;
+    margin-top: 14px;
+
+    button {
+      padding: 8px 14px;
+      border-radius: 8px;
+      border: 1px solid #d1d5db;
+      background: #fff;
+      cursor: pointer;
+
+      &[disabled] { opacity: .6; cursor: not-allowed; }
+    }
+  }
+}

@@ -31,9 +31,9 @@ model Technology {
   id              String    @id @default(uuid())
   name            String
   category        Category
-  ring            Ring
+  ring            Ring?
   techDescription String
-  ringDescription String
+  ringDescription String?
   createdAt       DateTime  @default(now())
   publishedAt     DateTime?
 }

@@ -1,0 +1,16 @@
+<h2>{{ isNew ? 'New' : 'Edit' }}</h2>
+
+<ng-container *ngIf="isNew; else edit">
+  <app-technology-form (save)="onSave($event)"></app-technology-form>
+</ng-container>
+
+<ng-template #edit>
+  <div *ngIf="data">
+    <p *ngIf="published" class="badge">Published - Ring & Description must not be empty</p>
+    <app-technology-form
+      [initial]="data"
+      [published]="published"
+      (save)="onSave($event)">
+    </app-technology-form>
+  </div>
+</ng-template>

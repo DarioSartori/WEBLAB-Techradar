@@ -1,6 +1,20 @@
-import { Body, Controller, HttpCode, HttpStatus, Post } from '@nestjs/common';
-import { TechnologiesService } from './technologies.service';
+import {
+  Body,
+  Controller,
+  Get,
+  HttpCode,
+  HttpStatus,
+  Param,
+  Patch,
+  Post,
+  Query,
+  UsePipes,
+  ValidationPipe,
+} from '@nestjs/common';
 import { CreateTechnologyDto } from './dto/create-technology.dto';
+import { TechnologiesService } from './technologies.service';
+import { PublishTechnologyDto } from './dto/publish-technology.dto';
+import { UpdateTechnologyDto } from './dto/update-technology.dto';
 
 @Controller('technologies')
 export class TechnologiesController {
@@ -8,7 +22,36 @@ export class TechnologiesController {
 
   @Post()
   @HttpCode(HttpStatus.CREATED)
-  create(@Body() dto: CreateTechnologyDto) {
+  create(
+    @Body(
+      new ValidationPipe({
+        whitelist: true,
+        forbidNonWhitelisted: true,
+        transform: true,
+      }),
+    )
+    dto: CreateTechnologyDto,
+  ) {
     return this.service.create(dto);
+  }
+
+  @Get()
+  list(@Query('status') status?: 'draft' | 'published' | 'all') {
+    return this.service.list(status);
+  }
+
+  @Get(':id')
+  find(@Param('id') id: string) {
+    return this.service.find(id);
+  }
+
+  @Patch(':id')
+  update(@Param('id') id: string, @Body() dto: UpdateTechnologyDto) {
+    return this.service.update(id, dto);
+  }
+
+  @Patch(':id/publish')
+  publish(@Param('id') id: string, @Body() dto: PublishTechnologyDto) {
+    return this.service.publish(id, dto.ring, dto.ringDescription);
   }
 }

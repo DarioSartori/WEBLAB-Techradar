@@ -1,6 +1,13 @@
-import { IsEnum, IsNotEmpty, IsString } from 'class-validator';
+import {
+  IsDefined,
+  IsEnum,
+  IsNotEmpty,
+  IsOptional,
+  IsString,
+} from 'class-validator';
 import { Category } from './category.enum';
 import { Ring } from './ring.enum';
+import { Transform } from 'class-transformer';
 
 export class CreateTechnologyDto {
   @IsString()
@@ -11,15 +18,16 @@ export class CreateTechnologyDto {
   @IsNotEmpty()
   category!: Category;
 
+  @IsOptional()
   @IsEnum(Ring)
-  @IsNotEmpty()
-  ring!: Ring;
+  @Transform(({ value }) => (value === '' ? undefined : value))
+  ring?: Ring;
 
   @IsString()
   @IsNotEmpty()
   techDescription!: string;
 
-  @IsString()
-  @IsNotEmpty()
-  ringDescription!: string;
+  @IsOptional()
+  @Transform(({ value }) => (value === '' ? undefined : value))
+  ringDescription?: string;
 }

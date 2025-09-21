@@ -1,38 +1,63 @@
+import { Ring } from './dto/ring.enum';
 import { TechnologiesService } from './technologies.service';
-import { CreateTechnologyDto } from './dto/create-technology.dto';
 
 describe('TechnologiesService', () => {
   const prisma = {
     technology: {
-      create: jest.fn().mockResolvedValue({ id: 'uuid', createdAt: new Date() }),
+      create: jest.fn(),
+      update: jest.fn(),
+      findUnique: jest.fn(),
+      findUniqueOrThrow: jest.fn(),
+      findMany: jest.fn(),
     },
   } as any;
 
-  let service: TechnologiesService;
+  let svc: TechnologiesService;
 
   beforeEach(() => {
-    service = new TechnologiesService(prisma);
+    jest.resetAllMocks();
+    svc = new TechnologiesService(prisma);
   });
 
-  it('creates a technology with all required fields', async () => {
-    const dto: CreateTechnologyDto = {
+  it('create: saves Draft (publishedAt null) and optional fields', async () => {
+    prisma.technology.create.mockResolvedValue({ id: '1' });
+    await svc.create({
       name: 'ArgoCD',
       category: 'Tools' as any,
-      ring: 'Trial' as any,
-      techDescription: 'Argo CD is declarative...',
-      ringDescription: 'Without making a judgment ...',
-    };
-
-    await service.create(dto);
-
+      techDescription: 'desc',
+      ring: undefined,
+      ringDescription: undefined,
+    });
     expect(prisma.technology.create).toHaveBeenCalledWith({
-      data: {
-        name: dto.name,
-        category: dto.category,
-        ring: dto.ring,
-        techDescription: dto.techDescription,
-        ringDescription: dto.ringDescription,
-      },
+      data: expect.objectContaining({
+        name: 'ArgoCD',
+        category: 'Tools',
+        techDescription: 'desc',
+        ring: null,
+        ringDescription: null,
+        publishedAt: null,
+      }),
+    });
+  });
+
+  it('publish: sets ring, reason, publishedAt', async () => {
+    prisma.technology.update.mockResolvedValue({ id: '1' });
+    await svc.publish('1', 'Trial' as Ring, 'Description');
+    expect(prisma.technology.update).toHaveBeenCalledWith({
+      where: { id: '1' },
+      data: { ring: 'Trial', ringDescription: 'Description', publishedAt: expect.any(Date) },
+    });
+  });
+
+  it('update: allows to empty draft fields (not published)', async () => {
+    prisma.technology.findUnique.mockResolvedValue({
+      publishedAt: null, ring: 'Trial', ringDescription: 'B',
+    });
+    prisma.technology.update.mockResolvedValue({ id: '1' });
+    await svc.update('1', { ring: null, ringDescription: '' as any });
+    expect(prisma.technology.update).toHaveBeenCalledWith({
+      where: { id: '1' },
+      data: expect.objectContaining({ ring: null, ringDescription: "" }),
     });
   });
 });

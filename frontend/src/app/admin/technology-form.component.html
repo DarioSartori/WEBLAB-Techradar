@@ -1,0 +1,30 @@
+<form [formGroup]="form" (ngSubmit)="submit()" class="form">
+  <input placeholder="Name" formControlName="name" />
+  <select formControlName="category">
+    <option value="">Category</option>
+    <option>Techniques</option>
+    <option>Platforms</option>
+    <option>Tools</option>
+    <option>LanguagesFrameworks</option>
+  </select>
+  <select formControlName="ring">
+    <option *ngIf="!published" value="">Ring (optional)</option>
+    <option>Assess</option>
+    <option>Trial</option>
+    <option>Adopt</option>
+    <option>Hold</option>
+  </select>
+  <textarea
+    placeholder="Description Technologie"
+    formControlName="techDescription"
+  ></textarea>
+  <textarea
+    formControlName="ringDescription"
+    [placeholder]="
+      published ? 'Description (required)' : 'Description (optional)'
+    "
+  >
+  </textarea>
+
+  <button type="submit" [disabled]="form.invalid">Save</button>
+</form>

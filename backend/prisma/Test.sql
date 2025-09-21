@@ -41,5 +41,5 @@ INSERT INTO "Technology" (
 ) VALUES
   (gen_random_uuid(), 'CoolNewTool', 'Tools', 'Assess',
    'Ein spannendes neues Tool, das wir noch evaluieren.',
-   'Noch keine offizielle Empfehlung – Draft!',
+   'Noch keine offizielle Empfehlung - Draft!',
    now(), NULL);

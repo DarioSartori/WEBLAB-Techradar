@@ -14,6 +14,6 @@ Der Umfang wird nicht angepasst
 - **Testing:** Cypress + Jest
 
 ## Struktur
-- frontend/ – Angular App
-- backend/  – NestJS API + Tests (Jest)
-- cypress/  – Cypress E2E-Tests
+- frontend/ - Angular App
+- backend/  - NestJS API + Tests (Jest)
+- cypress/  - Cypress E2E-Tests
