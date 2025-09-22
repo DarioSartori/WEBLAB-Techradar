@@ -19,14 +19,14 @@
     <tr *ngFor="let t of list">
       <td>{{ t.name }}</td>
       <td>{{ t.category }}</td>
-      <td>{{ t.ring || '—' }}</td>
+      <td>{{ t.ring || "—" }}</td>
       <td>
         <span
           class="badge"
           [class.draft]="!t.publishedAt"
           [class.published]="t.publishedAt"
         >
-          {{ t.publishedAt ? 'Published' : 'Draft' }}
+          {{ t.publishedAt ? "Published" : "Draft" }}
         </span>
       </td>
       <td>
@@ -37,42 +37,44 @@
   </tbody>
 </table>
 
-<!-- Dialog -->
 <dialog *ngIf="publishing" class="dialog" open aria-labelledby="publishTitle">
-  <button
-    type="button"
-    class="close-btn"
-    (click)="publishing = null"
-    aria-label="Close publish dialog"
-  >
-    ×
-  </button>
-
-  <h3 id="publishTitle">Publish: {{ publishing.name }}</h3>
-
-  <label for="ring">Ring</label>
-  <select
-    id="ring"
-    name="ring"
-    [(ngModel)]="pub.ring"
-    [attr.aria-invalid]="!pub.ring ? true : null"
-  >
-    <option [ngValue]="''">Please Choose</option>
-    <option *ngFor="let r of rings" [ngValue]="r">{{ r }}</option>
-  </select>
-
-  <label for="ringDescription">Description</label>
-  <textarea
-    id="ringDescription"
-    name="ringDescription"
-    [(ngModel)]="pub.ringDescription"
-    [attr.aria-invalid]="!pub.ringDescription ? true : null"
-  ></textarea>
-
-  <div class="actions">
-    <button (click)="doPublish()" [disabled]="!pub.ring || !pub.ringDescription">
-      Publish
+  <div class="panel">
+    <button
+      type="button"
+      class="close-btn"
+      (click)="publishing = null"
+      aria-label="Close publish dialog"
+    >
+      x
     </button>
-    <button (click)="publishing = null">Cancel</button>
+
+    <h3 id="publishTitle">Publish: {{ publishing.name }}</h3>
+
+    <label for="ring">Ring</label>
+    <select
+      id="ring"
+      name="ring"
+      [(ngModel)]="pub.ring"
+      [attr.aria-invalid]="!pub.ring ? true : null"
+    >
+      <option [ngValue]="''">Please Choose</option>
+      <option *ngFor="let r of rings" [ngValue]="r">{{ r }}</option>
+    </select>
+
+    <label for="ringDescription">Description</label>
+    <textarea
+      id="ringDescription"
+      name="ringDescription"
+      [(ngModel)]="pub.ringDescription"
+      [attr.aria-invalid]="!pub.ringDescription ? true : null"
+    ></textarea>
+
+    <div class="actions">
+      <button (click)="doPublish()" [disabled]="!pub.ring || !pub.ringDescription">
+        Publish
+      </button>
+      <button (click)="publishing = null">Cancel</button>
+    </div>
   </div>
 </dialog>
+

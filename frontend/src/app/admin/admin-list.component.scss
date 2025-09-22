@@ -10,6 +10,7 @@
     border-radius: .5rem;
     cursor: pointer;
   }
+
   .primary {
     background: #2563eb;
     color: #fff;
@@ -23,7 +24,8 @@ table {
   table-layout: fixed;
 }
 
-th, td {
+th,
+td {
   border: 1px solid #e5e7eb;
   padding: .5rem .75rem;
   width: 20%;
@@ -45,24 +47,54 @@ thead th {
   &.published { background: #bbf7d0; }
 }
 
-.dialog {
+/* ===== Dialog / Modal ===== */
+
+/* Fallback: füllt den Viewport und zentriert Inhalt */
+dialog.dialog {
   position: fixed;
   inset: 0;
-  z-index: 1000;
-
-  background-color: rgba(0, 0, 0, 0.45);
-
-  display: grid;
-  place-items: center;
+  margin: 0;
+  border: none;
+  padding: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: rgba(0, 0, 0, 0.45);
+  width: 100%;
+  height: 100%;
+  overflow: hidden; /* kein horizontales Scrollen */
 }
 
+/* Moderne Viewport-Einheiten gegen Scrollbar-Mismatch */
+@supports (width: 100dvw) {
+  dialog.dialog {
+    width: 100dvw;
+    height: 100dvh;
+  }
+}
+
+/* Wir verwenden eigenes Overlay auf dem Dialog; Backdrop bleibt transparent */
+dialog.dialog::backdrop {
+  background: transparent;
+}
+
+/* Panel: zentrierte Box, intern scrollbar bei viel Inhalt */
 .panel {
   background: #fff;
   color: #111;
-  width: min(92vw, 560px);
+  box-sizing: border-box;
+  width: min(92%, 560px); /* nie breiter als 560px, sonst 92% */
+  max-height: 90dvh;      /* Inhalt begrenzen */
+  overflow: auto;         /* intern scrollen */
   border-radius: 12px;
   box-shadow: 0 10px 30px rgba(0,0,0,.25);
   padding: 16px;
+  position: relative;
+
+  /* gegen Überbreite durch lange Inhalte/URLs */
+  min-width: 0;
+  word-break: break-word;
+  overflow-wrap: anywhere;
 
   h3 { margin: 0 0 12px; }
 
@@ -72,7 +104,9 @@ thead th {
     margin: 10px 0 6px;
   }
 
-  select, textarea {
+  select,
+  textarea {
+    min-width: 0;
     width: 100%;
     border: 1px solid #d1d5db;
     border-radius: 8px;
@@ -98,4 +132,17 @@ thead th {
       &[disabled] { opacity: .6; cursor: not-allowed; }
     }
   }
+}
+
+/* Close-Button oben rechts im Panel */
+.close-btn {
+  position: absolute;
+  top: 8px;
+  right: 8px;
+  appearance: none;
+  border: 0;
+  background: transparent;
+  font-size: 20px;
+  line-height: 1;
+  cursor: pointer;
 }
