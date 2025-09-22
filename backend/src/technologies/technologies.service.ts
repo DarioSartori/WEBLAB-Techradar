@@ -60,7 +60,7 @@ export class TechnologiesService {
         'Published technologies require ring and description.',
       );
     }
-    
+
     return this.prisma.technology.update({
       where: { id },
       data: {

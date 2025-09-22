@@ -6,8 +6,8 @@ import { RadarModule } from '../src/radar/radar.module';
 const prismaStub = {
   technology: {
     findMany: jest.fn().mockResolvedValue([
-      { id:'1', name:'ArgoCD', category:'Tools', ring:'Trial' },
-      { id:'2', name:'Kubernetes', category:'Platforms', ring:'Adopt' },
+      { id: '1', name: 'ArgoCD', category: 'Tools', ring: 'Trial' },
+      { id: '2', name: 'Kubernetes', category: 'Platforms', ring: 'Adopt' },
     ]),
   },
 };
@@ -25,15 +25,19 @@ describe('GET /radar', () => {
     await app.init();
   });
 
-  afterAll(async () => { await app.close(); });
+  afterAll(async () => {
+    await app.close();
+  });
 
   it('only delivers published technologies', async () => {
     await request(app.getHttpServer())
       .get('/radar')
       .expect(200)
-      .expect(res => {
+      .expect((res) => {
         expect(Array.isArray(res.body)).toBe(true);
-        expect(res.body.every((t: any) => t.id && t.category && t.ring)).toBe(true);
+        expect(res.body.every((t: any) => t.id && t.category && t.ring)).toBe(
+          true,
+        );
       });
   });
 });

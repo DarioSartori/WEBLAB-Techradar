@@ -1,10 +1,4 @@
-import {
-  IsDefined,
-  IsEnum,
-  IsNotEmpty,
-  IsOptional,
-  IsString,
-} from 'class-validator';
+import { IsEnum, IsNotEmpty, IsOptional, IsString } from 'class-validator';
 import { Category } from './category.enum';
 import { Ring } from './ring.enum';
 import { Transform } from 'class-transformer';

@@ -8,7 +8,6 @@ import {
   Patch,
   Post,
   Query,
-  UsePipes,
   ValidationPipe,
 } from '@nestjs/common';
 import { CreateTechnologyDto } from './dto/create-technology.dto';

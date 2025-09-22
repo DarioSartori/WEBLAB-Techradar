@@ -1,13 +1,13 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, inject, OnInit  } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { CommonModule } from '@angular/common';
 
-type Tech = {
+interface Tech {
   id: string;
   name: string;
   category: 'Techniques' | 'Platforms' | 'Tools' | 'LanguagesFrameworks';
   ring: 'Assess' | 'Trial' | 'Adopt' | 'Hold';
-};
+}
 type Grouped = Record<string, Record<string, Tech[]>>;
 
 @Component({
@@ -17,12 +17,12 @@ type Grouped = Record<string, Record<string, Tech[]>>;
   templateUrl: './radar-viewer.component.html',
   styleUrl: './radar-viewer.component.scss',
 })
-export class RadarViewerComponent {
+export class RadarViewerComponent implements OnInit{
   data: Grouped = {};
   loading = true;
   error = '';
 
-  constructor(private http: HttpClient) {}
+  private readonly http = inject(HttpClient);
 
   ngOnInit() {
     this.http.get<Tech[]>('/api/radar').subscribe({

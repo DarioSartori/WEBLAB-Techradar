@@ -17,7 +17,7 @@ describe('AdminListComponent', () => {
 
     const apiMock: Partial<TechnologiesApi> = {
       list: () => of([tech]),
-      get: (id: string) => of(tech),
+      get: () => of(tech),
       publish: (
         id: string,
         body: { ring: Tech['ring']; ringDescription: string }

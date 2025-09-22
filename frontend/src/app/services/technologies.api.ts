@@ -1,7 +1,7 @@
 import { inject, Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 
-export type Tech = {
+export interface Tech {
   id: string;
   name: string;
   category: 'Techniques' | 'Platforms' | 'Tools' | 'LanguagesFrameworks';
@@ -9,7 +9,7 @@ export type Tech = {
   techDescription: string;
   ringDescription?: string;
   publishedAt?: string | null;
-};
+}
 
 @Injectable({ providedIn: 'root' })
 export class TechnologiesApi {

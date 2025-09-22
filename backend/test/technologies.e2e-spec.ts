@@ -8,7 +8,9 @@ describe('TechnologiesController', () => {
   let app: INestApplication;
   const service = {
     create: jest.fn().mockResolvedValue({ id: '1' }),
-    publish: jest.fn().mockResolvedValue({ id: '1', publishedAt: new Date().toISOString() }),
+    publish: jest
+      .fn()
+      .mockResolvedValue({ id: '1', publishedAt: new Date().toISOString() }),
   } as Partial<TechnologiesService>;
 
   beforeAll(async () => {
@@ -18,7 +20,13 @@ describe('TechnologiesController', () => {
     }).compile();
 
     app = mod.createNestApplication();
-    app.useGlobalPipes(new ValidationPipe({ whitelist: true, transform: true, forbidNonWhitelisted: true }));
+    app.useGlobalPipes(
+      new ValidationPipe({
+        whitelist: true,
+        transform: true,
+        forbidNonWhitelisted: true,
+      }),
+    );
     await app.init();
   });
 

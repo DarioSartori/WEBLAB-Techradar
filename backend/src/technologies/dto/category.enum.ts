@@ -4,5 +4,3 @@ export enum Category {
   Tools = 'Tools',
   LanguagesFrameworks = 'LanguagesFrameworks',
 }
-
-

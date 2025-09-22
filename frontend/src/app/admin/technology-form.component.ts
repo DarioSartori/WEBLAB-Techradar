@@ -2,6 +2,17 @@ import { Component, EventEmitter, inject, Input, Output } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { ReactiveFormsModule, FormBuilder, Validators } from '@angular/forms';
 
+export type Category = 'Techniques' | 'Platforms' | 'Tools' | 'LanguagesFrameworks';
+export type Ring = 'Assess' | 'Trial' | 'Adopt' | 'Hold';
+
+interface TechFormModel {
+  name: string;
+  category: Category;
+  ring?: Ring;
+  techDescription: string;
+  ringDescription?: string;
+}
+
 @Component({
   standalone: true,
   selector: 'app-technology-form',
@@ -10,7 +21,7 @@ import { ReactiveFormsModule, FormBuilder, Validators } from '@angular/forms';
   styleUrl: './technology-form.component.scss',
 })
 export class TechnologyFormComponent {
-  private fb = inject(FormBuilder);
+  private readonly fb = inject(FormBuilder);
 
   private _published = false;
   @Input() set published(v: boolean) {
@@ -32,7 +43,7 @@ export class TechnologyFormComponent {
     return this._published;
   }
 
-  @Output() save = new EventEmitter<any>();
+  @Output() save = new EventEmitter<TechFormModel>();
 
   form = inject(FormBuilder).group({
     name: ['', Validators.required],
@@ -42,7 +53,7 @@ export class TechnologyFormComponent {
     ringDescription: [''],
   });
 
-  @Input() set initial(val: any) {
+  @Input() set initial(val: Partial<TechFormModel> | null) {
     if (!val) return;
     this.form.patchValue(
       {
@@ -57,6 +68,6 @@ export class TechnologyFormComponent {
   }
 
   submit() {
-    if (this.form.valid) this.save.emit(this.form.value);
+    if (this.form.valid) this.save.emit(this.form.value as TechFormModel);
   }
 }
