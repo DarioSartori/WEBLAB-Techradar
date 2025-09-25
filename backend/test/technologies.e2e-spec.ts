@@ -59,4 +59,26 @@ describe('TechnologiesController', () => {
       .send({ ring: 'Trial', ringDescription: 'Description' })
       .expect(200);
   });
+
+  it('PATCH /technologies/:id updates fields and sets updatedAt', async () => {
+    const createRes = await request(app.getHttpServer())
+      .post('/technologies')
+      .send({ name: 'A', category: 'Tools', techDescription: 'desc' })
+      .expect(201);
+
+    const id = createRes.body.id;
+    const before = createRes.body.updatedAt ?? createRes.body.createdAt;
+
+    const patchRes = await request(app.getHttpServer())
+      .patch(`/technologies/${id}`)
+      .send({ name: 'A2', category: 'Platforms', techDescription: 'desc2' })
+      .expect(200);
+
+    expect(patchRes.body.name).toBe('A2');
+    expect(patchRes.body.category).toBe('Platforms');
+    expect(patchRes.body.techDescription).toBe('desc2');
+    expect(new Date(patchRes.body.updatedAt).getTime()).toBeGreaterThan(
+      new Date(before).getTime(),
+    );
+  });
 });

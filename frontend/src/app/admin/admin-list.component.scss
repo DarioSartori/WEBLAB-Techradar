@@ -47,9 +47,6 @@ thead th {
   &.published { background: #bbf7d0; }
 }
 
-/* ===== Dialog / Modal ===== */
-
-/* Fallback: füllt den Viewport und zentriert Inhalt */
 dialog.dialog {
   position: fixed;
   inset: 0;
@@ -62,10 +59,9 @@ dialog.dialog {
   background: rgba(0, 0, 0, 0.45);
   width: 100%;
   height: 100%;
-  overflow: hidden; /* kein horizontales Scrollen */
+  overflow: hidden;
 }
 
-/* Moderne Viewport-Einheiten gegen Scrollbar-Mismatch */
 @supports (width: 100dvw) {
   dialog.dialog {
     width: 100dvw;
@@ -73,25 +69,22 @@ dialog.dialog {
   }
 }
 
-/* Wir verwenden eigenes Overlay auf dem Dialog; Backdrop bleibt transparent */
 dialog.dialog::backdrop {
   background: transparent;
 }
 
-/* Panel: zentrierte Box, intern scrollbar bei viel Inhalt */
 .panel {
   background: #fff;
   color: #111;
   box-sizing: border-box;
-  width: min(92%, 560px); /* nie breiter als 560px, sonst 92% */
-  max-height: 90dvh;      /* Inhalt begrenzen */
-  overflow: auto;         /* intern scrollen */
+  width: min(92%, 560px);
+  max-height: 90dvh;
+  overflow: auto;
   border-radius: 12px;
   box-shadow: 0 10px 30px rgba(0,0,0,.25);
   padding: 16px;
   position: relative;
 
-  /* gegen Überbreite durch lange Inhalte/URLs */
   min-width: 0;
   word-break: break-word;
   overflow-wrap: anywhere;
@@ -134,7 +127,6 @@ dialog.dialog::backdrop {
   }
 }
 
-/* Close-Button oben rechts im Panel */
 .close-btn {
   position: absolute;
   top: 8px;
