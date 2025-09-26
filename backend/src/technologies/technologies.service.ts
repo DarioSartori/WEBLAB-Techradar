@@ -35,6 +35,7 @@ export class TechnologiesService {
         name: true,
         category: true,
         ring: true,
+        ringDescription: true,
         publishedAt: true,
       },
     });

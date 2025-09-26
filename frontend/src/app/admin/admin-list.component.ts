@@ -1,11 +1,10 @@
-import { Component, HostListener, inject, OnInit } from '@angular/core';
+import { Component, inject, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { Router } from '@angular/router';
 import { TechnologiesApi, Tech } from '../services/technologies.api';
 
 type Ring = 'Assess' | 'Trial' | 'Adopt' | 'Hold' | '';
-type NonEmptyRing = Exclude<Ring, ''>;
 
 @Component({
   standalone: true,

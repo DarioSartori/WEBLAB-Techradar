@@ -5,9 +5,9 @@ export interface Tech {
   id: string;
   name: string;
   category: 'Techniques' | 'Platforms' | 'Tools' | 'LanguagesFrameworks';
-  ring?: 'Assess' | 'Trial' | 'Adopt' | 'Hold';
+  ring?: 'Assess' | 'Trial' | 'Adopt' | 'Hold' | null;
   techDescription: string;
-  ringDescription?: string;
+  ringDescription?: string | null;
   createdAt?: string;
   updatedAt?: string;
   publishedAt?: string | null;
