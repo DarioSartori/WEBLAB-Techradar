@@ -31,7 +31,7 @@
     >
       Please provide a description.
     </div>
-  </div>  
+  </div>
 
   <ng-container *ngIf="showClassificationFields">
     <div class="field">
@@ -44,11 +44,17 @@
 
     <div class="field">
       <label for="ringDescription">Ring description</label>
-      <textarea id="ringDescription" rows="4" formControlName="ringDescription"></textarea>
+      <textarea
+        id="ringDescription"
+        rows="4"
+        formControlName="ringDescription"
+      ></textarea>
     </div>
   </ng-container>
 
   <div class="actions">
-    <button type="submit" [disabled]="form.invalid">{{ submitLabel }}</button>
+    <button class="btn btn-primary" type="submit" [disabled]="form.invalid">
+      {{ submitLabel }}
+    </button>
   </div>
 </form>

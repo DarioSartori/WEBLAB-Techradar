@@ -56,3 +56,8 @@
   box-shadow: var(--shadow);
   padding: 16px;
 }
+
+@media (max-width: 640px) {
+  .page { padding: 16px 0; }
+  .card { padding: 12px; }
+}

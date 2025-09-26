@@ -9,3 +9,26 @@ html, body {
 img, table, section, div {
   max-width: 100%;
 }
+
+.btn {
+  appearance: none;
+  border: 1px solid #e5e7eb;
+  background: #fff;
+  color: #111827;
+  padding: 8px 12px;
+  border-radius: 10px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: transform .05s ease, background .15s ease, border-color .15s ease;
+}
+.btn:hover { background: #f9fafb; border-color: #cbd5e1; }
+.btn:active { transform: translateY(1px); }
+.btn:disabled { opacity: .6; cursor: not-allowed; }
+
+.btn-primary {
+  background: #2563eb;
+  border-color: #2563eb;
+  color: #fff;
+}
+.btn-primary:hover { background: #1d4ed8; border-color: #1d4ed8; }
+
