@@ -9,7 +9,10 @@
     "test": "jest -c jest.config.ts",
     "test:watch": "jest -c jest.config.ts --watch",
     "test:coverage": "jest -c jest.config.ts --coverage",
-    "lint": "ng lint"
+    "lint": "ng lint",
+    "e2e": "cypress run",
+    "e2e:open": "cypress open",
+    "e2e:headed": "cypress run --headed --browser chrome"
   },
   "private": true,
   "dependencies": {

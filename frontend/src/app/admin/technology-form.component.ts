@@ -84,16 +84,23 @@ export class TechnologyFormComponent implements OnInit, OnChanges {
     const v = this.form.value;
 
     const payload: any = {
-      name: v.name,
+      name: (v.name ?? '').trim(),
       category: v.category,
-      techDescription: v.techDescription,
+      techDescription: (v.techDescription ?? '').trim(),
     };
-    
+
     if (this.showClassificationFields) {
-      if (v.ring) payload.ring = v.ring as NonNullable<Tech['ring']>;
-      if (v.ringDescription)
-        payload.ringDescription = v.ringDescription as string;
+      const ring = (v.ring ?? '').toString().trim();
+      if (ring) {
+        payload.ring = ring as NonNullable<Tech['ring']>;
+      }
+
+      const ringDesc = (v.ringDescription ?? '').toString().trim();
+      if (ringDesc) {
+        payload.ringDescription = ringDesc;
+      }
     }
+
     this.save.emit(payload);
   }
 }

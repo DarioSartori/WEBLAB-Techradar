@@ -1,16 +1,8 @@
 {
-  "extends": "../tsconfig.json",
   "compilerOptions": {
-    "types": ["cypress"],
-    "noEmit": true
+    "target": "es2021",
+    "lib": ["es2021", "dom"],
+    "types": ["cypress"]
   },
-  "include": [
-    "e2e/**/*.cy.ts",
-    "e2e/**/*.cy.tsx",
-    "component/**/*.cy.ts",
-    "component/**/*.cy.tsx",
-    "support/**/*.ts",
-    "support/**/*.d.ts"
-  ],
-  "exclude": []
+  "include": ["**/*.ts"]
 }

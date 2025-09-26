@@ -49,10 +49,12 @@ export class TechnologyEditPage implements OnInit {
       category: payload.category,
       techDescription: payload.techDescription,
     };
-    
-    if (payload.ring) body.ring = payload.ring;
-    if (payload.ringDescription) body.ringDescription = payload.ringDescription;
-    
+
+    const ring = (payload.ring ?? '').toString().trim();
+    if (ring) body.ring = ring;
+    const rdesc = (payload.ringDescription ?? '').toString().trim();
+    if (rdesc) body.ringDescription = rdesc;
+
     this.api.create(body).subscribe({
       next: () => this.router.navigate(['/admin/technologies']),
     });
