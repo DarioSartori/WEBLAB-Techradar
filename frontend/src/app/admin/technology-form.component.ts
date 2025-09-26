@@ -21,7 +21,7 @@ import { Tech } from '../services/technologies.api';
   selector: 'app-technology-form',
   imports: [CommonModule, ReactiveFormsModule],
   templateUrl: './technology-form.component.html',
-  styleUrl: './technology-form.component.scss',
+  styleUrls: ['./technology-form.component.scss'],
 })
 export class TechnologyFormComponent implements OnInit, OnChanges {
   @Input() value: Partial<Tech> | null = null;

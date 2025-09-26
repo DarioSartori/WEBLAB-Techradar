@@ -15,7 +15,7 @@ type Grouped = Record<string, Record<string, Tech[]>>;
   standalone: true,
   imports: [CommonModule],
   templateUrl: './radar-viewer.component.html',
-  styleUrl: './radar-viewer.component.scss',
+  styleUrls: ['./radar-viewer.component.scss'],
 })
 export class RadarViewerComponent implements OnInit{
   data: Grouped = {};

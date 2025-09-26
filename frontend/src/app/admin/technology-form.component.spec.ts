@@ -1,38 +1,77 @@
 import { TestBed } from '@angular/core/testing';
 import { TechnologyFormComponent } from './technology-form.component';
+import { By } from '@angular/platform-browser';
 
 describe('TechnologyFormComponent', () => {
   beforeEach(async () => {
-    await TestBed.configureTestingModule({ imports: [TechnologyFormComponent] }).compileComponents();
+    await TestBed.configureTestingModule({
+      imports: [TechnologyFormComponent],
+    }).compileComponents();
   });
 
-  it('patches initial Values', () => {
+  it('renders required base fields', () => {
     const fixture = TestBed.createComponent(TechnologyFormComponent);
-    const cmp = fixture.componentInstance;
-    cmp.initial = {
-      name: 'ArgoCD', category: 'Tools', ring: 'Trial',
-      techDescription: 'desc', ringDescription: 'why'
-    };
     fixture.detectChanges();
-    const value = cmp.form.value;
-    expect(value.name).toBe('ArgoCD');
-    expect(value.ring).toBe('Trial');
+    expect(fixture.debugElement.query(By.css('#name'))).toBeTruthy();
+    expect(fixture.debugElement.query(By.css('#category'))).toBeTruthy();
+    expect(fixture.debugElement.query(By.css('#techDescription'))).toBeTruthy();
   });
 
-  it('sets required when published=true for ring & ringDescription', () => {
+  it('shows classification fields when enabled', () => {
     const fixture = TestBed.createComponent(TechnologyFormComponent);
-    const cmp = fixture.componentInstance;
-    cmp.published = true;
+    const comp = fixture.componentInstance;
+    comp.showClassificationFields = true;
     fixture.detectChanges();
 
-    const ringCtrl = cmp.form.get('ring')!;
-    const descCtrl = cmp.form.get('ringDescription')!;
-    ringCtrl.setValue(''); descCtrl.setValue('');
-    expect(ringCtrl.valid).toBe(false);
-    expect(descCtrl.valid).toBe(false);
+    expect(fixture.debugElement.query(By.css('#ring'))).toBeTruthy();
+    expect(fixture.debugElement.query(By.css('#ringDescription'))).toBeTruthy();
+  });
 
-    ringCtrl.setValue('Trial'); descCtrl.setValue('ok');
-    expect(ringCtrl.valid).toBe(true);
-    expect(descCtrl.valid).toBe(true);
+  it('hides classification fields when disabled', () => {
+    const fixture = TestBed.createComponent(TechnologyFormComponent);
+    const comp = fixture.componentInstance;
+    comp.showClassificationFields = false;
+    fixture.detectChanges();
+
+    expect(fixture.debugElement.query(By.css('#ring'))).toBeFalsy();
+  });
+
+  it('emits only filled classification fields', () => {
+    const fixture = TestBed.createComponent(TechnologyFormComponent);
+    const comp = fixture.componentInstance;
+    comp.showClassificationFields = true;
+    fixture.detectChanges();
+
+    comp.form.patchValue({
+      name: 'ArgoCD',
+      category: 'Tools',
+      techDescription: 'GitOps CD',
+      ring: 'Adopt',
+      ringDescription: ''
+    });
+
+    let emitted: any | undefined;
+    comp.save.subscribe(v => (emitted = v));
+    fixture.debugElement.query(By.css('form')).triggerEventHandler('ngSubmit', {});
+
+    expect(emitted).toEqual({
+      name: 'ArgoCD',
+      category: 'Tools',
+      techDescription: 'GitOps CD',
+      ring: 'Adopt',
+    });
+  });
+
+  it('blocks submit when required base fields are missing', () => {
+    const fixture = TestBed.createComponent(TechnologyFormComponent);
+    const comp = fixture.componentInstance;
+    comp.showClassificationFields = true;
+    fixture.detectChanges();
+
+    comp.form.patchValue({ name: '', category: '', techDescription: '' });
+    let emitted = false;
+    comp.save.subscribe(() => (emitted = true));
+    fixture.debugElement.query(By.css('form')).triggerEventHandler('ngSubmit', {});
+    expect(emitted).toBe(false);
   });
 });
