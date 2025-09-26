@@ -1,17 +1,20 @@
-import { Component, EventEmitter, inject, Input, Output } from '@angular/core';
+import {
+  Component,
+  EventEmitter,
+  Input,
+  OnChanges,
+  OnInit,
+  Output,
+  SimpleChanges,
+} from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { ReactiveFormsModule, FormBuilder, Validators } from '@angular/forms';
-
-export type Category = 'Techniques' | 'Platforms' | 'Tools' | 'LanguagesFrameworks';
-export type Ring = 'Assess' | 'Trial' | 'Adopt' | 'Hold';
-
-interface TechFormModel {
-  name: string;
-  category: Category;
-  ring?: Ring;
-  techDescription: string;
-  ringDescription?: string;
-}
+import {
+  FormBuilder,
+  FormGroup,
+  ReactiveFormsModule,
+  Validators,
+} from '@angular/forms';
+import { Tech } from '../services/technologies.api';
 
 @Component({
   standalone: true,
@@ -20,54 +23,77 @@ interface TechFormModel {
   templateUrl: './technology-form.component.html',
   styleUrl: './technology-form.component.scss',
 })
-export class TechnologyFormComponent {
-  private readonly fb = inject(FormBuilder);
+export class TechnologyFormComponent implements OnInit, OnChanges {
+  @Input() value: Partial<Tech> | null = null;
+  @Input() showClassificationFields = false;
+  @Input() submitLabel = 'Save';
 
-  private _published = false;
-  @Input() set published(v: boolean) {
-    this._published = !!v;
-    const ring = this.form.get('ring');
-    const ringDesc = this.form.get('ringDescription');
+  @Output() save = new EventEmitter<{
+    name: string;
+    category: Tech['category'];
+    techDescription: string;
+    ring?: NonNullable<Tech['ring']>;
+    ringDescription?: string;
+  }>();
 
-    if (this._published) {
-      ring?.setValidators([Validators.required]);
-      ringDesc?.setValidators([Validators.required]);
-    } else {
-      ring?.clearValidators();
-      ringDesc?.clearValidators();
+  form!: FormGroup;
+
+  readonly CATEGORY_OPTIONS: Tech['category'][] = [
+    'Techniques',
+    'Platforms',
+    'Tools',
+    'LanguagesFrameworks',
+  ];
+
+  readonly RING_OPTIONS: NonNullable<Tech['ring']>[] = [
+    'Assess',
+    'Trial',
+    'Adopt',
+    'Hold',
+  ];
+
+  constructor(private readonly fb: FormBuilder) {}
+
+  ngOnInit() {
+    this.form = this.fb.group({
+      name: ['', [Validators.required, Validators.minLength(1)]],
+      category: ['', [Validators.required]],
+      techDescription: ['', [Validators.required, Validators.minLength(1)]],
+      ring: [''],
+      ringDescription: [''],
+    });
+
+    if (this.value) this.form.patchValue(this.value);
+  }
+
+  ngOnChanges(changes: SimpleChanges): void {
+    if (changes['value'] && this.form && this.value) {
+      this.form.patchValue(this.value);
     }
-    ring?.updateValueAndValidity({ emitEvent: false });
-    ringDesc?.updateValueAndValidity({ emitEvent: false });
-  }
-  get published() {
-    return this._published;
   }
 
-  @Output() save = new EventEmitter<TechFormModel>();
-
-  form = inject(FormBuilder).group({
-    name: ['', Validators.required],
-    category: ['', Validators.required],
-    ring: [''],
-    techDescription: ['', [Validators.required]],
-    ringDescription: [''],
-  });
-
-  @Input() set initial(val: Partial<TechFormModel> | null) {
-    if (!val) return;
-    this.form.patchValue(
-      {
-        name: val.name ?? '',
-        category: val.category ?? '',
-        ring: val.ring ?? '',
-        techDescription: val.techDescription ?? '',
-        ringDescription: val.ringDescription ?? '',
-      },
-      { emitEvent: false }
-    );
+  get f() {
+    return this.form.controls;
   }
 
   submit() {
-    if (this.form.valid) this.save.emit(this.form.value as TechFormModel);
+    if (this.form.invalid) {
+      this.form.markAllAsTouched();
+      return;
+    }
+    const v = this.form.value;
+
+    const payload: any = {
+      name: v.name,
+      category: v.category,
+      techDescription: v.techDescription,
+    };
+    
+    if (this.showClassificationFields) {
+      if (v.ring) payload.ring = v.ring as NonNullable<Tech['ring']>;
+      if (v.ringDescription)
+        payload.ringDescription = v.ringDescription as string;
+    }
+    this.save.emit(payload);
   }
 }

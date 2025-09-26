@@ -6,79 +6,105 @@ import { TechnologiesService } from '../src/technologies/technologies.service';
 
 describe('TechnologiesController', () => {
   let app: INestApplication;
-  const service = {
-    create: jest.fn().mockResolvedValue({ id: '1' }),
-    publish: jest
+
+  const nowIso = new Date().toISOString();
+  const mockService = {
+    create: jest.fn().mockImplementation((dto) => ({
+      id: 't1',
+      ...dto,
+      createdAt: nowIso,
+      updatedAt: nowIso,
+      publishedAt: null,
+    })),
+    list: jest.fn().mockResolvedValue([]),
+    find: jest.fn().mockResolvedValue({ id: 't1' }),
+    update: jest.fn().mockImplementation((_id, dto) => ({
+      id: 't1',
+      ...dto,
+      updatedAt: new Date().toISOString(),
+    })),
+    publish: jest.fn().mockImplementation((_id, ring, ringDescription) => ({
+      id: 't1',
+      ring,
+      ringDescription,
+      publishedAt: nowIso,
+      updatedAt: new Date().toISOString(),
+    })),
+    reclassify: jest
       .fn()
-      .mockResolvedValue({ id: '1', publishedAt: new Date().toISOString() }),
+      .mockImplementation((_id, ring, ringDescription) => ({
+        id: 't1',
+        ring,
+        ringDescription,
+        publishedAt: '2025-01-01T00:00:00.000Z',
+        updatedAt: new Date().toISOString(),
+      })),
   } as Partial<TechnologiesService>;
 
   beforeAll(async () => {
-    const mod = await Test.createTestingModule({
+    const moduleRef = await Test.createTestingModule({
       controllers: [TechnologiesController],
-      providers: [{ provide: TechnologiesService, useValue: service }],
+      providers: [{ provide: TechnologiesService, useValue: mockService }],
     }).compile();
 
-    app = mod.createNestApplication();
+    app = moduleRef.createNestApplication();
     app.useGlobalPipes(
-      new ValidationPipe({
-        whitelist: true,
-        transform: true,
-        forbidNonWhitelisted: true,
-      }),
+      new ValidationPipe({ whitelist: true, forbidNonWhitelisted: true }),
     );
     await app.init();
   });
 
-  afterAll(async () => app.close());
-
-  it('POST /technologies -> 201 (Draft, ring optional)', async () => {
-    await request(app.getHttpServer())
-      .post('/technologies')
-      .send({ name: 'X', category: 'Tools', techDescription: 'desc' })
-      .expect(201);
+  afterAll(async () => {
+    await app.close();
   });
 
-  it('POST /technologies -> 400 if required field missing', async () => {
+  it('POST /technologies -> 400 if required fields are missing', async () => {
     await request(app.getHttpServer())
       .post('/technologies')
-      .send({ category: 'Tools', techDescription: 'desc' })
+      .send({ name: '', category: '', techDescription: '' })
       .expect(400);
   });
 
-  it('PATCH /technologies/:id/publish -> 400 if required fields missing', async () => {
+  it('POST /technologies -> 201 Draft without classification', async () => {
+    const res = await request(app.getHttpServer())
+      .post('/technologies')
+      .send({ name: 'A', category: 'Tools', techDescription: 'desc' })
+      .expect(201);
+    expect(res.body.name).toBe('A');
+    expect(res.body.publishedAt).toBeNull();
+  });
+
+  it('PATCH /technologies/:id/publish -> 400 if fields missing', async () => {
     await request(app.getHttpServer())
-      .patch('/technologies/1/publish')
+      .patch('/technologies/t1/publish')
       .send({ ring: 'Trial' })
       .expect(400);
   });
 
-  it('PATCH /technologies/:id/publish -> 200 with  ring + ringDescription', async () => {
-    await request(app.getHttpServer())
-      .patch('/technologies/1/publish')
-      .send({ ring: 'Trial', ringDescription: 'Description' })
+  it('PATCH /technologies/:id/publish -> 200 sets publishedAt', async () => {
+    const res = await request(app.getHttpServer())
+      .patch('/technologies/t1/publish')
+      .send({ ring: 'Trial', ringDescription: 'Initial' })
       .expect(200);
+    expect(res.body.publishedAt).toBeTruthy();
+    expect(res.body.ring).toBe('Trial');
   });
 
-  it('PATCH /technologies/:id updates fields and sets updatedAt', async () => {
-    const createRes = await request(app.getHttpServer())
-      .post('/technologies')
-      .send({ name: 'A', category: 'Tools', techDescription: 'desc' })
-      .expect(201);
+  it('PATCH /technologies/:id/reclassify -> 400 if fields missing', async () => {
+    await request(app.getHttpServer())
+      .patch('/technologies/t1/reclassify')
+      .send({ ring: 'Adopt' })
+      .expect(400);
+  });
 
-    const id = createRes.body.id;
-    const before = createRes.body.updatedAt ?? createRes.body.createdAt;
-
-    const patchRes = await request(app.getHttpServer())
-      .patch(`/technologies/${id}`)
-      .send({ name: 'A2', category: 'Platforms', techDescription: 'desc2' })
+  it('PATCH /technologies/:id/reclassify -> 200 changes Ring, publishedAt doesnt change', async () => {
+    const before = '2025-01-01T00:00:00.000Z';
+    const res = await request(app.getHttpServer())
+      .patch('/technologies/t1/reclassify')
+      .send({ ring: 'Adopt', ringDescription: 'Updated' })
       .expect(200);
-
-    expect(patchRes.body.name).toBe('A2');
-    expect(patchRes.body.category).toBe('Platforms');
-    expect(patchRes.body.techDescription).toBe('desc2');
-    expect(new Date(patchRes.body.updatedAt).getTime()).toBeGreaterThan(
-      new Date(before).getTime(),
-    );
+    expect(res.body.ring).toBe('Adopt');
+    expect(res.body.ringDescription).toBe('Updated');
+    expect(res.body.publishedAt).toBe(before);
   });
 });

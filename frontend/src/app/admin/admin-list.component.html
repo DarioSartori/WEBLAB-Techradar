@@ -1,80 +1,155 @@
-<div class="toolbar">
-  <button (click)="filter = 'all'; load()">All</button>
-  <button (click)="filter = 'draft'; load()">Drafts</button>
-  <button (click)="filter = 'published'; load()">Published</button>
-  <button class="primary" (click)="new()">New</button>
-</div>
+<div class="page">
+  <div class="container">
+    <header class="page-header">
+      <div class="title">
+        <h1>Technologies</h1>
+        <p class="subtitle">Manage drafts, publish, and change classification</p>
+      </div>
 
-<table>
-  <thead>
-    <tr>
-      <th>Name</th>
-      <th>Category</th>
-      <th>Ring</th>
-      <th>State</th>
-      <th>Actions</th>
-    </tr>
-  </thead>
-  <tbody>
-    <tr *ngFor="let t of list">
-      <td>{{ t.name }}</td>
-      <td>{{ t.category }}</td>
-      <td>{{ t.ring || "—" }}</td>
-      <td>
-        <span
-          class="badge"
-          [class.draft]="!t.publishedAt"
-          [class.published]="t.publishedAt"
-        >
-          {{ t.publishedAt ? "Published" : "Draft" }}
-        </span>
-      </td>
-      <td>
-        <button (click)="edit(t)">Edit</button>
-        <button *ngIf="!t.publishedAt" (click)="openPublish(t)">Publish</button>
-      </td>
-    </tr>
-  </tbody>
-</table>
+      <div class="toolbar">
+        <div class="segmented">
+          <button (click)="toggle('all')" [class.active]="filter==='all'">All</button>
+          <button (click)="toggle('draft')" [class.active]="filter==='draft'">Drafts</button>
+          <button (click)="toggle('published')" [class.active]="filter==='published'">Published</button>
+        </div>
+        <button class="btn btn-primary" (click)="new()">New</button>
+      </div>
+    </header>
 
-<dialog *ngIf="publishing" class="dialog" open aria-labelledby="publishTitle">
-  <div class="panel">
-    <button
-      type="button"
-      class="close-btn"
-      (click)="publishing = null"
-      aria-label="Close publish dialog"
+    <section class="card">
+      <div class="table-wrap">
+        <table class="table">
+          <thead>
+            <tr>
+              <th>Name</th>
+              <th>Category</th>
+              <th>Ring</th>
+              <th>Status</th>
+              <th class="cell-actions">Actions</th>
+            </tr>
+          </thead>
+
+          <tbody>
+            <tr *ngFor="let t of list">
+              <td class="cell-name">
+                <div class="stack">
+                  <span class="name">{{ t.name }}</span>
+                  <span class="muted id">ID: {{ t.id }}</span>
+                </div>
+              </td>
+              <td class="cell-cat">{{ t.category }}</td>
+              <td class="cell-ring">{{ t.ring || '—' }}</td>
+              <td>
+                <span
+                  class="badge"
+                  [class.draft]="!t.publishedAt"
+                  [class.published]="t.publishedAt"
+                >
+                  {{ t.publishedAt ? 'Published' : 'Draft' }}
+                </span>
+              </td>
+              <td class="cell-actions">
+                <div class="actions">
+                  <button class="btn" (click)="edit(t)">Edit</button>
+                  <button class="btn" *ngIf="!t.publishedAt" (click)="openPublish(t)">Publish</button>
+                  <button class="btn" *ngIf="t.publishedAt" (click)="openReclassify(t)">Change classification</button>
+                </div>
+              </td>
+            </tr>
+
+            <tr *ngIf="list.length === 0">
+              <td colspan="5" class="empty">
+                <div class="empty-state">
+                  <div class="empty-title">No entries</div>
+                  <div class="empty-text">
+                    Switch the filter above or create a new technology.
+                  </div>
+                </div>
+              </td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </section>
+
+    <div
+      class="modal"
+      *ngIf="publishing as p"
+      tabindex="-1"
+      role="dialog"
+      aria-modal="true"
+      aria-labelledby="publishTitle"
+      (keydown.escape)="cancelPublish()"
     >
-      x
-    </button>
+      <div class="modal__backdrop" (click)="cancelPublish()"></div>
+      <div class="modal__dialog" role="document">
+        <div class="modal__content">
+          <h3 id="publishTitle">Publish: {{ p.name }}</h3>
 
-    <h3 id="publishTitle">Publish: {{ publishing.name }}</h3>
+          <label>Ring
+            <select [(ngModel)]="publishForm.ring">
+              <option value="">-- select --</option>
+              <option>Assess</option>
+              <option>Trial</option>
+              <option>Adopt</option>
+              <option>Hold</option>
+            </select>
+          </label>
 
-    <label for="ring">Ring</label>
-    <select
-      id="ring"
-      name="ring"
-      [(ngModel)]="pub.ring"
-      [attr.aria-invalid]="!pub.ring ? true : null"
+          <label>Classification description
+            <textarea rows="4" [(ngModel)]="publishForm.ringDescription"></textarea>
+          </label>
+
+          <div class="modal__actions">
+            <button class="btn btn-primary"
+                    (click)="confirmPublish()"
+                    [disabled]="!publishForm.ring || !publishForm.ringDescription">
+              Publish
+            </button>
+            <button class="btn" (click)="cancelPublish()">Cancel</button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div
+      class="modal"
+      *ngIf="reclassifying as r"
+      tabindex="-1"
+      role="dialog"
+      aria-modal="true"
+      aria-labelledby="reclassifyTitle"
+      (keydown.escape)="cancelReclassify()"
     >
-      <option [ngValue]="''">Please Choose</option>
-      <option *ngFor="let r of rings" [ngValue]="r">{{ r }}</option>
-    </select>
+      <div class="modal__backdrop" (click)="cancelReclassify()"></div>
+      <div class="modal__dialog" role="document">
+        <div class="modal__content">
+          <h3 id="reclassifyTitle">Change classification: {{ r.name }}</h3>
 
-    <label for="ringDescription">Description</label>
-    <textarea
-      id="ringDescription"
-      name="ringDescription"
-      [(ngModel)]="pub.ringDescription"
-      [attr.aria-invalid]="!pub.ringDescription ? true : null"
-    ></textarea>
+          <label>Ring
+            <select [(ngModel)]="reclassifyForm.ring">
+              <option value="">-- select --</option>
+              <option>Assess</option>
+              <option>Trial</option>
+              <option>Adopt</option>
+              <option>Hold</option>
+            </select>
+          </label>
 
-    <div class="actions">
-      <button (click)="doPublish()" [disabled]="!pub.ring || !pub.ringDescription">
-        Publish
-      </button>
-      <button (click)="publishing = null">Cancel</button>
+          <label>Classification description
+            <textarea rows="4" [(ngModel)]="reclassifyForm.ringDescription"></textarea>
+          </label>
+
+          <div class="modal__actions">
+            <button class="btn btn-primary"
+                    (click)="confirmReclassify()"
+                    [disabled]="!reclassifyForm.ring || !reclassifyForm.ringDescription">
+              Save
+            </button>
+            <button class="btn" (click)="cancelReclassify()">Cancel</button>
+          </div>
+        </div>
+      </div>
     </div>
   </div>
-</dialog>
-
+</div>

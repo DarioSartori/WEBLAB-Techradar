@@ -1,30 +1,54 @@
 <form [formGroup]="form" (ngSubmit)="submit()" class="form">
-  <input placeholder="Name" formControlName="name" />
-  <select formControlName="category">
-    <option value="">Category</option>
-    <option>Techniques</option>
-    <option>Platforms</option>
-    <option>Tools</option>
-    <option>LanguagesFrameworks</option>
-  </select>
-  <select formControlName="ring">
-    <option *ngIf="!published" value="">Ring (optional)</option>
-    <option>Assess</option>
-    <option>Trial</option>
-    <option>Adopt</option>
-    <option>Hold</option>
-  </select>
-  <textarea
-    placeholder="Description Technologie"
-    formControlName="techDescription"
-  ></textarea>
-  <textarea
-    formControlName="ringDescription"
-    [placeholder]="
-      published ? 'Description (required)' : 'Description (optional)'
-    "
-  >
-  </textarea>
+  <div class="field">
+    <label for="name">Name</label>
+    <input id="name" type="text" formControlName="name" />
+    <div class="error" *ngIf="f['name'].touched && f['name'].invalid">
+      Please provide a name.
+    </div>
+  </div>
 
-  <button type="submit" [disabled]="form.invalid">Save</button>
+  <div class="field">
+    <label for="category">Category</label>
+    <select id="category" formControlName="category">
+      <option value="">-- choose --</option>
+      <option *ngFor="let c of CATEGORY_OPTIONS" [value]="c">{{ c }}</option>
+    </select>
+    <div class="error" *ngIf="f['category'].touched && f['category'].invalid">
+      Please select a category.
+    </div>
+  </div>
+
+  <div class="field">
+    <label for="techDescription">Description Technology</label>
+    <textarea
+      id="techDescription"
+      rows="4"
+      formControlName="techDescription"
+    ></textarea>
+    <div
+      class="error"
+      *ngIf="f['techDescription'].touched && f['techDescription'].invalid"
+    >
+      Please provide a description.
+    </div>
+  </div>  
+
+  <ng-container *ngIf="showClassificationFields">
+    <div class="field">
+      <label for="ring">Classification / Ring</label>
+      <select id="ring" formControlName="ring">
+        <option value="">-- choose --</option>
+        <option *ngFor="let r of RING_OPTIONS" [value]="r">{{ r }}</option>
+      </select>
+    </div>
+
+    <div class="field">
+      <label for="ringDescription">Ring description</label>
+      <textarea id="ringDescription" rows="4" formControlName="ringDescription"></textarea>
+    </div>
+  </ng-container>
+
+  <div class="actions">
+    <button type="submit" [disabled]="form.invalid">{{ submitLabel }}</button>
+  </div>
 </form>

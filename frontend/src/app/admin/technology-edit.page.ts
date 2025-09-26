@@ -1,47 +1,69 @@
-import { Component, inject, OnInit } from '@angular/core';
-import { CommonModule } from '@angular/common';
+import { Component, OnInit, inject } from '@angular/core';
 import { ActivatedRoute, Router } from '@angular/router';
-import { TechnologiesApi } from '../services/technologies.api';
+import { CommonModule } from '@angular/common';
 import { TechnologyFormComponent } from './technology-form.component';
-
-interface Tech {
-  id: string;
-  name: string;
-  category: 'Techniques' | 'Platforms' | 'Tools' | 'LanguagesFrameworks';
-  ring?: 'Assess' | 'Trial' | 'Adopt' | 'Hold';
-  techDescription: string;
-  ringDescription?: string;
-  publishedAt?: string | null;
-}
-
-type TechUpsertDto = Omit<Tech, 'id'>;
+import { TechnologiesApi, Tech } from '../services/technologies.api';
 
 @Component({
   standalone: true,
+  selector: 'app-technology-edit-page',
   imports: [CommonModule, TechnologyFormComponent],
   templateUrl: './technology-edit.page.html',
   styleUrls: ['./technology-edit.page.scss'],
 })
 export class TechnologyEditPage implements OnInit {
-  private readonly api = inject(TechnologiesApi);
   private readonly route = inject(ActivatedRoute);
   private readonly router = inject(Router);
-  
-  isNew = !this.route.snapshot.paramMap.get('id');
-  data: Tech | null = null;
-  published = false;
+  private readonly api = inject(TechnologiesApi);
 
-  ngOnInit() {
+  mode: 'create' | 'edit' = 'create';
+  tech: Tech | null = null;
+  loading = true;
+
+  ngOnInit(): void {
     const id = this.route.snapshot.paramMap.get('id');
-    if (id)
-      this.api.get(id).subscribe((d: Tech) => {
-        this.data = d;
-        this.published = !!d.publishedAt;
+    this.mode = id ? 'edit' : 'create';
+
+    if (this.mode === 'edit' && id) {
+      this.api.get(id).subscribe({
+        next: (t) => {
+          this.tech = t;
+          this.loading = false;
+        },
+        error: () => (this.loading = false),
       });
+    } else {
+      this.loading = false;
+    }
   }
-  onSave(v: TechUpsertDto) {
-    const id = this.route.snapshot.paramMap.get('id');
-    const req = id ? this.api.update(id, v) : this.api.create(v);
-    req.subscribe(() => this.router.navigateByUrl('/admin/technologies'));
+
+  create(payload: {
+    name: string;
+    category: Tech['category'];
+    techDescription: string;
+    ring?: NonNullable<Tech['ring']>;
+    ringDescription?: string;
+  }) {
+    const body: any = {
+      name: payload.name,
+      category: payload.category,
+      techDescription: payload.techDescription,
+    };
+    
+    if (payload.ring) body.ring = payload.ring;
+    if (payload.ringDescription) body.ringDescription = payload.ringDescription;
+    
+    this.api.create(body).subscribe({
+      next: () => this.router.navigate(['/admin/technologies']),
+    });
+  }
+
+  update(
+    payload: Partial<Pick<Tech, 'name' | 'category' | 'techDescription'>>
+  ) {
+    if (!this.tech) return;
+    this.api.update(this.tech.id, payload).subscribe({
+      next: () => this.router.navigate(['/admin/technologies']),
+    });
   }
 }

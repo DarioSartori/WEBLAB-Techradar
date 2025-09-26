@@ -18,23 +18,38 @@ export class AdminListComponent implements OnInit {
   private readonly api = inject(TechnologiesApi);
   private readonly router = inject(Router);
 
-  list: Tech[] = [];
   filter: 'draft' | 'published' | 'all' = 'all';
+  list: Tech[] = [];
 
   publishing: Tech | null = null;
-  pub: { ring: Ring; ringDescription: string } = {
+  publishForm: {
+    ring: '' | NonNullable<Tech['ring']>;
+    ringDescription: string;
+  } = {
     ring: '',
     ringDescription: '',
   };
 
-  rings: NonEmptyRing[] = ['Assess', 'Trial', 'Adopt', 'Hold'];
+  reclassifying: Tech | null = null;
+  reclassifyForm: {
+    ring: '' | NonNullable<Tech['ring']>;
+    ringDescription: string;
+  } = {
+    ring: '',
+    ringDescription: '',
+  };
 
   ngOnInit() {
     this.load();
   }
 
   load() {
-    this.api.list(this.filter).subscribe((d) => (this.list = d));
+    this.api.list(this.filter).subscribe((d: Tech[]) => (this.list = d));
+  }
+
+  toggle(filter: 'draft' | 'published' | 'all') {
+    this.filter = filter;
+    this.load();
   }
 
   new() {
@@ -46,39 +61,56 @@ export class AdminListComponent implements OnInit {
   }
 
   openPublish(t: Tech) {
+    if (t.publishedAt) return;
     this.publishing = t;
-    this.pub = {
+    this.publishForm = {
       ring: (t.ring ?? '') as Ring,
       ringDescription: t.ringDescription ?? '',
     };
-
-    this.api.get(t.id).subscribe((full) => {
-      this.pub.ring = (full.ring ?? '') as Ring;
-      this.pub.ringDescription = full.ringDescription ?? '';
-    });
   }
 
-  
+  confirmPublish() {
+    const t = this.publishing;
+    const f = this.publishForm;
+    if (!t || !f.ring || !f.ringDescription) return;
 
-  @HostListener('document:keydown.escape')
-  onEscape(): void {
-    if (this.publishing) {
-      this.publishing = null;
-    }
+    this.api
+      .publish(t.id, { ring: f.ring, ringDescription: f.ringDescription })
+      .subscribe(() => {
+        this.cancelPublish();
+        this.load();
+      });
   }
 
-  doPublish() {
-    if (!this.publishing || !this.pub.ring || !this.pub.ringDescription) return;
+  cancelPublish() {
+    this.publishing = null;
+    this.publishForm = { ring: '', ringDescription: '' };
+  }
 
-    const payload: { ring: NonEmptyRing; ringDescription: string } = {
-      ring: this.pub.ring as NonEmptyRing,
-      ringDescription: this.pub.ringDescription,
+  openReclassify(t: Tech) {
+    if (!t.publishedAt) return;
+    this.reclassifying = t;
+    this.reclassifyForm = {
+      ring: (t.ring ?? '') as any,
+      ringDescription: t.ringDescription ?? '',
     };
+  }
 
-    this.api.publish(this.publishing.id, payload).subscribe(() => {
-      this.publishing = null;
-      this.pub = { ring: '', ringDescription: '' };
-      this.load();
-    });
+  confirmReclassify() {
+    const t = this.reclassifying;
+    const f = this.reclassifyForm;
+    if (!t || !f.ring || !f.ringDescription) return;
+
+    this.api
+      .reclassify(t.id, { ring: f.ring, ringDescription: f.ringDescription })
+      .subscribe(() => {
+        this.cancelReclassify();
+        this.load();
+      });
+  }
+
+  cancelReclassify() {
+    this.reclassifying = null;
+    this.reclassifyForm = { ring: '', ringDescription: '' };
   }
 }

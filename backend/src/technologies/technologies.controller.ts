@@ -2,13 +2,10 @@ import {
   Body,
   Controller,
   Get,
-  HttpCode,
-  HttpStatus,
   Param,
   Patch,
   Post,
   Query,
-  ValidationPipe,
 } from '@nestjs/common';
 import { CreateTechnologyDto } from './dto/create-technology.dto';
 import { TechnologiesService } from './technologies.service';
@@ -20,17 +17,7 @@ export class TechnologiesController {
   constructor(private readonly service: TechnologiesService) {}
 
   @Post()
-  @HttpCode(HttpStatus.CREATED)
-  create(
-    @Body(
-      new ValidationPipe({
-        whitelist: true,
-        forbidNonWhitelisted: true,
-        transform: true,
-      }),
-    )
-    dto: CreateTechnologyDto,
-  ) {
+  create(@Body() dto: CreateTechnologyDto) {
     return this.service.create(dto);
   }
 
@@ -52,5 +39,10 @@ export class TechnologiesController {
   @Patch(':id/publish')
   publish(@Param('id') id: string, @Body() dto: PublishTechnologyDto) {
     return this.service.publish(id, dto.ring, dto.ringDescription);
+  }
+
+  @Patch(':id/reclassify')
+  reclassify(@Param('id') id: string, @Body() dto: PublishTechnologyDto) {
+    return this.service.reclassify(id, dto.ring, dto.ringDescription);
   }
 }

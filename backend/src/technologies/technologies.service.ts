@@ -1,8 +1,4 @@
-import {
-  BadRequestException,
-  Injectable,
-  NotFoundException,
-} from '@nestjs/common';
+import { Injectable, NotFoundException } from '@nestjs/common';
 import { PrismaClient } from '@prisma/client';
 import { CreateTechnologyDto } from './dto/create-technology.dto';
 import { Ring } from './dto/ring.enum';
@@ -11,28 +7,28 @@ import { UpdateTechnologyDto } from './dto/update-technology.dto';
 @Injectable()
 export class TechnologiesService {
   constructor(private readonly prisma: PrismaClient) {}
+
   create(dto: CreateTechnologyDto) {
     return this.prisma.technology.create({
       data: {
         name: dto.name,
         category: dto.category,
-        ring: dto.ring ?? null,
         techDescription: dto.techDescription,
-        ringDescription: dto.ringDescription ?? null,
-        publishedAt: null,
+        ...(dto.ring !== undefined && { ring: dto.ring ?? null }),
+        ...(dto.ringDescription !== undefined && {
+          ringDescription: dto.ringDescription ?? null,
+        }),
       },
     });
   }
 
   list(status?: 'draft' | 'published' | 'all') {
-    const where =
-      status === 'draft'
+    return this.prisma.technology.findMany({
+      where: status === 'draft'
         ? { publishedAt: null }
         : status === 'published'
           ? { publishedAt: { not: null } }
-          : {};
-    return this.prisma.technology.findMany({
-      where,
+          : {},
       orderBy: [{ createdAt: 'desc' }],
       select: {
         id: true,
@@ -45,22 +41,10 @@ export class TechnologiesService {
   }
 
   find(id: string) {
-    return this.prisma.technology.findUnique({ where: { id } });
+    return this.prisma.technology.findUniqueOrThrow({ where: { id } });
   }
 
-  async update(id: string, dto: UpdateTechnologyDto) {
-    const current = await this.prisma.technology.findUnique({ where: { id } });
-    if (!current) throw new NotFoundException();
-
-    const nextRing = dto.ring ?? current.ring;
-    const nextRingDesc = dto.ringDescription ?? current.ringDescription;
-
-    if (current.publishedAt && (!nextRing || !nextRingDesc?.trim())) {
-      throw new BadRequestException(
-        'Published technologies require ring and description.',
-      );
-    }
-
+  update(id: string, dto: UpdateTechnologyDto) {
     return this.prisma.technology.update({
       where: { id },
       data: {
@@ -68,10 +52,6 @@ export class TechnologiesService {
         ...(dto.category !== undefined && { category: dto.category }),
         ...(dto.techDescription !== undefined && {
           techDescription: dto.techDescription,
-        }),
-        ...(dto.ring !== undefined && { ring: dto.ring ?? null }),
-        ...(dto.ringDescription !== undefined && {
-          ringDescription: dto.ringDescription ?? null,
         }),
       },
     });
@@ -81,6 +61,17 @@ export class TechnologiesService {
     return this.prisma.technology.update({
       where: { id },
       data: { ring, ringDescription, publishedAt: new Date() },
+    });
+  }
+
+  reclassify(id: string, ring: Ring, ringDescription: string) {
+    const tech = this.prisma.technology.findUnique({ where: { id } });
+
+    if (!tech) throw new NotFoundException('Technology not found');
+
+    return this.prisma.technology.update({
+      where: { id },
+      data: { ring, ringDescription },
     });
   }
 }

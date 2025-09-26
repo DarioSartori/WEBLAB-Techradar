@@ -1,16 +1,32 @@
-<h2>{{ isNew ? 'New' : 'Edit' }}</h2>
+<div class="page">
+  <div class="container">
+    <header class="page-header">
+      <div class="title">
+        <h1>{{ mode === 'create' ? 'Create technology' : 'Edit technology' }}</h1>
+        <p class="subtitle">
+          {{ mode === 'create' ? 'Add a new technology' : 'Update base information' }}
+        </p>
+      </div>
+    </header>
 
-<ng-container *ngIf="isNew; else edit">
-  <app-technology-form (save)="onSave($event)"></app-technology-form>
-</ng-container>
+    <section class="card">
+      <ng-container *ngIf="mode === 'create'">
+        <app-technology-form
+          [value]="null"
+          [showClassificationFields]="true"
+          submitLabel="Create"
+          (save)="create($event)">
+        </app-technology-form>
+      </ng-container>
 
-<ng-template #edit>
-  <div *ngIf="data">
-    <p *ngIf="published" class="badge">Published - Ring & Description must not be empty</p>
-    <app-technology-form
-      [initial]="data"
-      [published]="published"
-      (save)="onSave($event)">
-    </app-technology-form>
+      <ng-container *ngIf="mode === 'edit'">
+        <app-technology-form
+          [value]="tech"
+          [showClassificationFields]="false"
+          submitLabel="Save"
+          (save)="update($event)">
+        </app-technology-form>
+      </ng-container>
+    </section>
   </div>
-</ng-template>
+</div>
