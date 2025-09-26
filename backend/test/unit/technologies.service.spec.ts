@@ -98,7 +98,7 @@ describe('TechnologiesService (unit)', () => {
     await service.list('draft');
     expect(prisma.technology.findMany).toHaveBeenCalledWith({
       where: { publishedAt: null },
-      select: { category: true, id: true, name: true, publishedAt: true, ring: true },
+      select: { category: true, id: true, name: true, publishedAt: true, ring: true, ringDescription: true },
       orderBy: [{ createdAt: 'desc' }],
     });
   });

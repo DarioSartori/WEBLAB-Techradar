@@ -1,38 +1,77 @@
-describe('Viewer - shows only published technologies', () => {
-  it('grouped by category and ring and renders names in the second column', () => {
-    cy.intercept('GET', '**/api/radar*', [
-      { id: '1', name: 'ArgoCD',     category: 'Tools',     ring: 'Trial' },
-      { id: '2', name: 'Kubernetes', category: 'Platforms', ring: 'Adopt' },
-      { id: '3', name: 'Rust',       category: 'LanguagesFrameworks', ring: 'Assess' },
-    ]).as('radar');
+/// <reference types="cypress" />
+
+describe('Viewer - groups by category and ring', () => {
+  it('renders categories, rings and technology pills', () => {
+    cy.intercept('GET', '**/api/radar*', {
+      statusCode: 200,
+      body: [
+        { id: '1', name: 'ArgoCD',     category: 'Tools',                ring: 'Trial' },
+        { id: '2', name: 'Kubernetes', category: 'Platforms',            ring: 'Adopt' },
+        { id: '3', name: 'Rust',       category: 'LanguagesFrameworks',  ring: 'Assess' },
+      ],
+    }).as('radar');
 
     cy.visit('/viewer');
     cy.wait('@radar');
 
-    cy.contains('Loading...').should('not.exist');
-    cy.get('[data-cy^="category-"]').should('have.length', 4);
+    cy.contains('h2', 'Technology Radar', { timeout: 8000 }).should('exist');
 
-    cy.get('[data-cy="category-Tools"]').within(() => {
-      cy.get('[data-cy="ring-Trial"] td').eq(1).should('contain.text', 'ArgoCD');
-      cy.get('[data-cy="ring-Assess"] td').eq(1).should('contain', '-');
-      cy.get('[data-cy="ring-Adopt"]  td').eq(1).should('contain', '-');
-      cy.get('[data-cy="ring-Hold"]   td').eq(1).should('contain', '-');
-    });
+    cy.get('.card.cat').should('have.length', 4);
 
-    cy.get('[data-cy="category-Platforms"]').within(() => {
-      cy.get('[data-cy="ring-Adopt"] td').eq(1).should('contain.text', 'Kubernetes');
-      cy.get('[data-cy="ring-Assess"] td').eq(1).should('contain', '-');
-    });
+    cy.contains('.card.cat .card-header .chip', /^Tools$/)
+      .parents('.card.cat')
+      .within(() => {
+        cy.contains('tbody tr .ring', 'Trial')
+          .parents('tr')
+          .find('td').eq(1)
+          .within(() => cy.get('.pill').contains('ArgoCD').should('exist'));
 
-    cy.get('[data-cy="category-LanguagesFrameworks"]').within(() => {
-      cy.get('[data-cy="ring-Assess"] td').eq(1).should('contain.text', 'Rust');
-      cy.get('[data-cy="ring-Trial"] td').eq(1).should('contain', '-');
-    });
+        ['Assess', 'Adopt', 'Hold'].forEach(r =>
+          cy.contains('tbody tr .ring', r)
+            .parents('tr')
+            .find('td').eq(1)
+            .within(() => cy.get('.pill').should('have.length', 0))
+        );
+      });
 
-    cy.get('[data-cy="category-Techniques"]').within(() => {
-      ['Assess','Trial','Adopt','Hold'].forEach(r =>
-        cy.get(`[data-cy="ring-${r}"] td`).eq(1).should('contain', '-')
-      );
-    });
+    cy.contains('.card.cat .card-header .chip', /^Platforms$/)
+      .parents('.card.cat')
+      .within(() => {
+        cy.contains('tbody tr .ring', 'Adopt')
+          .parents('tr')
+          .find('td').eq(1)
+          .within(() => cy.get('.pill').contains('Kubernetes').should('exist'));
+      });
+
+    cy.contains('.card.cat .card-header .chip', /^Languages & Frameworks$/)
+      .parents('.card.cat')
+      .within(() => {
+        cy.contains('tbody tr .ring', 'Assess')
+          .parents('tr')
+          .find('td').eq(1)
+          .within(() => cy.get('.pill').contains('Rust').should('exist'));
+      });
+
+    cy.contains('.card.cat .card-header .chip', /^Techniques$/)
+      .parents('.card.cat')
+      .within(() => {
+        ['Assess', 'Trial', 'Adopt', 'Hold'].forEach(r =>
+          cy.contains('tbody tr .ring', r)
+            .parents('tr')
+            .find('td').eq(1)
+            .within(() => cy.get('.pill').should('have.length', 0))
+        );
+      });
+
+    cy.get('.page.viewer, .viewer').should('not.contain.text', 'id:');
+  });
+
+  it('shows empty state', () => {
+    cy.intercept('GET', '**/api/radar*', { statusCode: 200, body: [] }).as('radar-empty');
+    cy.visit('/viewer');
+    cy.wait('@radar-empty');
+
+    cy.contains('h2', 'Technology Radar').should('exist');
+    cy.get('.empty-state').should('contain.text', 'No technologies yet');
   });
 });
