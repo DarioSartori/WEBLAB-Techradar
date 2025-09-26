@@ -1,7 +1,7 @@
 import { INestApplication } from '@nestjs/common';
 import { Test } from '@nestjs/testing';
 import * as request from 'supertest';
-import { RadarModule } from '../src/radar/radar.module';
+import { RadarModule } from '../../src/radar/radar.module';
 
 const prismaStub = {
   technology: {

@@ -64,8 +64,8 @@ export class TechnologiesService {
     });
   }
 
-  reclassify(id: string, ring: Ring, ringDescription: string) {
-    const tech = this.prisma.technology.findUnique({ where: { id } });
+  async reclassify(id: string, ring: Ring, ringDescription: string) {
+    const tech = await this.prisma.technology.findUnique({ where: { id } });
 
     if (!tech) throw new NotFoundException('Technology not found');
 
