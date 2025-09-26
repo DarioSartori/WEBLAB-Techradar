@@ -1,14 +1,18 @@
-import { Component, inject, OnInit } from '@angular/core';
+import { Component, OnInit, inject } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { CommonModule } from '@angular/common';
+
+type Category = 'Techniques' | 'Platforms' | 'Tools' | 'LanguagesFrameworks';
+type Ring = 'Assess' | 'Trial' | 'Adopt' | 'Hold';
 
 interface Tech {
   id: string;
   name: string;
-  category: 'Techniques' | 'Platforms' | 'Tools' | 'LanguagesFrameworks';
-  ring: 'Assess' | 'Trial' | 'Adopt' | 'Hold';
+  category: Category;
+  ring: Ring;
 }
-type Grouped = Record<Tech['category'], Record<Tech['ring'], Tech[]>>;
+
+type Grouped = Record<Category, Record<Ring, Tech[]>>;
 
 @Component({
   selector: 'app-radar-viewer',
@@ -18,30 +22,26 @@ type Grouped = Record<Tech['category'], Record<Tech['ring'], Tech[]>>;
   styleUrls: ['./radar-viewer.component.scss'],
 })
 export class RadarViewerComponent implements OnInit {
+  private readonly http = inject(HttpClient);
+
+  readonly categories: Category[] = ['Techniques', 'Platforms', 'Tools', 'LanguagesFrameworks'];
+  readonly rings: Ring[] = ['Assess', 'Trial', 'Adopt', 'Hold'];
+
   data: Grouped = {
     Techniques: { Assess: [], Trial: [], Adopt: [], Hold: [] },
     Platforms: { Assess: [], Trial: [], Adopt: [], Hold: [] },
     Tools: { Assess: [], Trial: [], Adopt: [], Hold: [] },
     LanguagesFrameworks: { Assess: [], Trial: [], Adopt: [], Hold: [] },
   };
+
   loading = true;
   error = '';
   totalCount = 0;
 
-  readonly categories: Tech['category'][] = [
-    'Techniques',
-    'Platforms',
-    'Tools',
-    'LanguagesFrameworks',
-  ];
-  readonly rings: Tech['ring'][] = ['Assess', 'Trial', 'Adopt', 'Hold'];
-
-  private readonly http = inject(HttpClient);
-
-  ngOnInit() {
+  ngOnInit(): void {
     this.http.get<Tech[]>('/api/radar').subscribe({
       next: (items) => {
-        this.data = this.group(items);
+        this.group(items);
         this.totalCount = items.length;
         this.loading = false;
       },
@@ -52,24 +52,24 @@ export class RadarViewerComponent implements OnInit {
     });
   }
 
-  private group(items: Tech[]): Grouped {
-    const g: Grouped = {
-      Techniques: { Assess: [], Trial: [], Adopt: [], Hold: [] },
-      Platforms: { Assess: [], Trial: [], Adopt: [], Hold: [] },
-      Tools: { Assess: [], Trial: [], Adopt: [], Hold: [] },
-      LanguagesFrameworks: { Assess: [], Trial: [], Adopt: [], Hold: [] },
-    };
-    for (const t of items) g[t.category][t.ring].push(t);
-    return g;
+  private group(items: Tech[]) {
+    for (const c of this.categories) {
+      for (const r of this.rings) this.data[c][r] = [];
+    }
+    for (const t of items) {
+      this.data[t.category][t.ring].push(t);
+    }
   }
 
-  categoryClass(cat: Tech['category']) {
-    return `chip--${cat}`;
-  }
-  ringClass(r: Tech['ring']) {
-    return `ring--${r}`;
-  }
-  catLabel(cat: Tech['category']) {
+  catLabel(cat: Category) {
     return cat === 'LanguagesFrameworks' ? 'Languages & Frameworks' : cat;
+  }
+
+  ringClass(r: Ring) {
+    return 'ring--' + r;
+  }
+
+  categoryClass(cat: Category) {
+    return 'chip--' + cat;
   }
 }
