@@ -1,19 +1,84 @@
-# Node/Angular
-node_modules/
-dist/
-.angular/
-coverage/
-# Cypress
-cypress/videos/
-cypress/screenshots/
-# .NET
-bin/
-obj/
-*.user
-*.suo
-*.swp
-# OS/IDE
+# -----------------------
+# OS / Editor
+# -----------------------
 .DS_Store
 Thumbs.db
-.vscode/
 .idea/
+.vscode/
+*.iml
+
+# -----------------------
+# Node / Package Manager
+# -----------------------
+node_modules/
+**/node_modules/
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+lerna-debug.log*
+
+# -----------------------
+# Build-/Output-Verzeichnisse
+# -----------------------
+dist/
+**/dist/
+build/
+**/build/
+out/
+**/out/
+out-tsc/
+**/out-tsc/
+tmp/
+.tmp/
+.temp/
+.cache/
+**/.cache/
+
+# -----------------------
+# Angular
+# -----------------------
+.angular/
+**/.angular/
+.angular/cache/
+**/.angular/cache/
+
+# -----------------------
+# Tests / Coverage
+# -----------------------
+coverage/
+**/coverage/
+.jest/
+.jest-cache/
+jest-cache/
+*.tsbuildinfo
+
+# Cypress Artefakte
+cypress/videos/
+cypress/screenshots/
+cypress/downloads/
+
+# -----------------------
+# Umgebungsvariablen
+# -----------------------
+.env
+.env.*
+!.env.example
+!**/.env.example
+
+# -----------------------
+# Prisma / lokale DB-Dateien (falls mal SQLite verwendet wird)
+# -----------------------
+*.db
+*.sqlite
+*.sqlite-journal
+prisma/dev.db
+prisma/dev.db-journal
+
+# -----------------------
+# Sonstiges
+# -----------------------
+.sass-cache/
+logs/
+*.log
+logs/**

@@ -3,9 +3,10 @@ import { AppController } from './app.controller';
 import { AppService } from './app.service';
 import { TechnologiesModule } from './technologies/technologies.module';
 import { RadarModule } from './radar/radar.module';
+import { AuthModule } from './auth/auth.module';
 
 @Module({
-  imports: [TechnologiesModule, RadarModule],
+  imports: [AuthModule, TechnologiesModule, RadarModule],
   controllers: [AppController],
   providers: [AppService],
 })

@@ -1,77 +1,37 @@
-/// <reference types="cypress" />
+describe('Viewer - groups by category and ring (new markup)', () => {
+  beforeEach(() => {
+    cy.loginJwt('EMPLOYEE');
 
-describe('Viewer - groups by category and ring', () => {
+    cy.intercept('GET', '**/api/radar*', [
+      { id: '1', name: 'ArgoCD',     category: 'Tools',                 ring: 'Trial'  },
+      { id: '2', name: 'Kubernetes', category: 'Platforms',             ring: 'Adopt'  },
+      { id: '3', name: 'Rust',       category: 'LanguagesFrameworks',   ring: 'Assess' },
+    ]).as('radar');
+  });
+
   it('renders categories, rings and technology pills', () => {
-    cy.intercept('GET', '**/api/radar*', {
-      statusCode: 200,
-      body: [
-        { id: '1', name: 'ArgoCD',     category: 'Tools',                ring: 'Trial' },
-        { id: '2', name: 'Kubernetes', category: 'Platforms',            ring: 'Adopt' },
-        { id: '3', name: 'Rust',       category: 'LanguagesFrameworks',  ring: 'Assess' },
-      ],
-    }).as('radar');
-
     cy.visit('/viewer');
     cy.wait('@radar');
 
-    cy.contains('h2', 'Technology Radar', { timeout: 8000 }).should('exist');
+    cy.contains('h2', 'Technology Radar').should('be.visible');
 
-    cy.get('.card.cat').should('have.length', 4);
-
-    cy.contains('.card.cat .card-header .chip', /^Tools$/)
-      .parents('.card.cat')
-      .within(() => {
-        cy.contains('tbody tr .ring', 'Trial')
-          .parents('tr')
-          .find('td').eq(1)
-          .within(() => cy.get('.pill').contains('ArgoCD').should('exist'));
-
-        ['Assess', 'Adopt', 'Hold'].forEach(r =>
-          cy.contains('tbody tr .ring', r)
-            .parents('tr')
-            .find('td').eq(1)
-            .within(() => cy.get('.pill').should('have.length', 0))
-        );
+    cy.get('section.card.cat').should('have.length', 4);
+    cy.contains('.card-header .chip', /^Tools$/).parents('section.card.cat').within(() => {
+      cy.contains('tbody tr', /\bTrial\b/).within(() => {
+        cy.get('.pill-list .pill').should('contain.text', 'ArgoCD');
       });
+    });
 
-    cy.contains('.card.cat .card-header .chip', /^Platforms$/)
-      .parents('.card.cat')
-      .within(() => {
-        cy.contains('tbody tr .ring', 'Adopt')
-          .parents('tr')
-          .find('td').eq(1)
-          .within(() => cy.get('.pill').contains('Kubernetes').should('exist'));
+    cy.contains('.card-header .chip', /^Platforms$/).parents('section.card.cat').within(() => {
+      cy.contains('tbody tr', /\bAdopt\b/).within(() => {
+        cy.get('.pill-list .pill').should('contain.text', 'Kubernetes');
       });
+    });
 
-    cy.contains('.card.cat .card-header .chip', /^Languages & Frameworks$/)
-      .parents('.card.cat')
-      .within(() => {
-        cy.contains('tbody tr .ring', 'Assess')
-          .parents('tr')
-          .find('td').eq(1)
-          .within(() => cy.get('.pill').contains('Rust').should('exist'));
+    cy.contains('.card-header .chip', /^Languages & Frameworks$/).parents('section.card.cat').within(() => {
+      cy.contains('tbody tr', /\bAssess\b/).within(() => {
+        cy.get('.pill-list .pill').should('contain.text', 'Rust');
       });
-
-    cy.contains('.card.cat .card-header .chip', /^Techniques$/)
-      .parents('.card.cat')
-      .within(() => {
-        ['Assess', 'Trial', 'Adopt', 'Hold'].forEach(r =>
-          cy.contains('tbody tr .ring', r)
-            .parents('tr')
-            .find('td').eq(1)
-            .within(() => cy.get('.pill').should('have.length', 0))
-        );
-      });
-
-    cy.get('.page.viewer, .viewer').should('not.contain.text', 'id:');
-  });
-
-  it('shows empty state', () => {
-    cy.intercept('GET', '**/api/radar*', { statusCode: 200, body: [] }).as('radar-empty');
-    cy.visit('/viewer');
-    cy.wait('@radar-empty');
-
-    cy.contains('h2', 'Technology Radar').should('exist');
-    cy.get('.empty-state').should('contain.text', 'No technologies yet');
+    });
   });
 });

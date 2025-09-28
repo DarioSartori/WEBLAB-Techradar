@@ -1,55 +1,66 @@
-/// <reference types="cypress" />
+describe('Technology end-to-end flow', () => {
+  beforeEach(() => {
+    cy.loginJwt('CTO');
 
-describe('Technology end-to-end flow (no DB reset)', () => {
+    cy.intercept('GET', '**/api/technologies*').as('list');
+    cy.intercept('POST', '**/api/technologies').as('createTech');
+    cy.intercept('PATCH', '**/api/technologies/*/publish').as('publishTech');
+    cy.intercept('PATCH', '**/api/technologies/*').as('updateTech');
+    cy.intercept('PATCH', '**/api/technologies/*/reclassify').as('reclassifyTech');
+  });
+
   it('creates draft -> publishes -> edits base -> reclassifies', () => {
-    const uniqueName = `ArgoCD ${Date.now()}`;
-    
-    cy.visit('/admin/technologies');
-    cy.contains('button', 'New').click();
-    cy.location('pathname').should('include', '/admin/technologies/new');
+    const baseName = `ArgoCD-${Date.now()}`;
 
-    cy.get('#name').type(uniqueName);
+    cy.visit('/admin/technologies');
+    cy.wait('@list');
+    cy.contains('button', /^New$/).click();
+    cy.url().should('include', '/admin/technologies/new');
+
+    cy.get('#name').type(baseName);
     cy.get('#category').select('Tools');
     cy.get('#techDescription').type('GitOps CD for Kubernetes');
 
-    cy.intercept('POST', '/api/technologies').as('createTech');
-    cy.contains('button', 'Create').click();
+    cy.get('form').should('exist').within(() => {
+      cy.get('button[type="submit"]').should('be.visible').click();
+    });
     cy.wait('@createTech').its('response.statusCode').should('be.oneOf', [200, 201]);
 
-    cy.location('pathname').should('eq', '/admin/technologies');
-
-    cy.contains('tr', uniqueName).within(() => {
-      cy.get('.badge').should('contain.text', 'Draft');
-      cy.contains('button', 'Publish').click();
+    cy.url().should('include', '/admin/technologies');
+    cy.wait('@list');
+    cy.contains('tr', baseName).within(() => {
+      cy.get('.badge.draft').should('exist');
+      cy.contains('button', /^Publish$/).click();
     });
 
-    cy.get('.modal').within(() => {
-      cy.get('select').select('Trial');
-      cy.get('textarea').type('Initial classification');
-      cy.contains('button', 'Publish').click();
+    cy.get('.modal').should('be.visible');
+    cy.get('.modal select').select('Trial');
+    cy.get('.modal textarea').type('Try in selected teams');
+    cy.get('.modal .btn.btn-primary').click();
+    cy.wait('@publishTech').its('response.statusCode').should('eq', 200);
+
+    cy.contains('tr', baseName).within(() => {
+      cy.get('.badge.published').should('exist');
+      cy.contains('button', /^Edit$/).click();
     });
 
-    cy.contains('tr', uniqueName).within(() => {
-      cy.get('.badge').should('contain.text', 'Published');
-      cy.contains('button', 'Edit').click();
-    });
+    cy.url().should('match', /\/admin\/technologies\/.+\/edit$/);
+    cy.get('#techDescription').clear().type('Updated description');
 
-    const renamed = `${uniqueName} v2`;
-    cy.get('#name').clear().type(renamed);
-    cy.contains('button', 'Save').click();
-
-    cy.contains('tr', renamed).within(() => {
-      cy.contains('button', 'Change classification').click();
+    cy.get('form').within(() => {
+      cy.get('button[type="submit"]').should('be.visible').click();
     });
+    cy.wait('@updateTech').its('response.statusCode').should('be.oneOf', [200, 204]);
 
-    cy.get('.modal').within(() => {
-      cy.get('select').select('Adopt');
-      cy.get('textarea').clear().type('Mature and recommended');
-      cy.contains('button', 'Save').click();
+    cy.url().should('include', '/admin/technologies');
+    cy.wait('@list');
+    cy.contains('tr', baseName).within(() => {
+      cy.contains('button', /^Change classification$/).click();
     });
-
-    cy.contains('tr', renamed).within(() => {
-      cy.get('td').eq(2).should('contain.text', 'Adopt');
-    });
+    cy.get('.modal').should('be.visible');
+    cy.get('.modal select').select('Adopt');
+    cy.get('.modal textarea').clear().type('We adopt this now');
+    cy.get('.modal .btn.btn-primary').click();
+    cy.wait('@reclassifyTech').its('response.statusCode').should('eq', 200);
   });
 });

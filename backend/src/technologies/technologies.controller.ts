@@ -6,13 +6,19 @@ import {
   Patch,
   Post,
   Query,
+  UseGuards,
 } from '@nestjs/common';
 import { CreateTechnologyDto } from './dto/create-technology.dto';
 import { TechnologiesService } from './technologies.service';
 import { PublishTechnologyDto } from './dto/publish-technology.dto';
 import { UpdateTechnologyDto } from './dto/update-technology.dto';
+import { JwtAuthGuard } from 'src/common/jwt-auth.guard';
+import { RolesGuard } from 'src/common/roles.guard';
+import { Roles } from 'src/common/roles.decorator';
 
 @Controller('technologies')
+@UseGuards(JwtAuthGuard, RolesGuard)
+@Roles('CTO', 'TECH_LEAD')
 export class TechnologiesController {
   constructor(private readonly service: TechnologiesService) {}
 

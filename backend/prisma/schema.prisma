@@ -38,3 +38,28 @@ model Technology {
   updatedAt       DateTime @updatedAt
   publishedAt     DateTime?
 }
+
+enum Role {
+  CTO
+  TECH_LEAD
+  EMPLOYEE
+}
+
+model User {
+  id           String   @id @default(cuid())
+  email        String   @unique
+  passwordHash String
+  role         Role
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+}
+
+model LoginAudit {
+  id        String   @id @default(cuid())
+  email     String
+  success   Boolean
+  ip        String?
+  userId    String?
+  context   String   @default("ADMIN")
+  createdAt DateTime @default(now())
+}
