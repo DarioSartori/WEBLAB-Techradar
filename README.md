@@ -13,7 +13,46 @@ Der Umfang wird nicht angepasst
 - **Auth:** JWT
 - **Testing:** Cypress + Jest
 
-## Struktur
-- frontend/ - Angular App
-- backend/  - NestJS API + Tests (Jest)
-- cypress/  - Cypress E2E-Tests
+## Setup
+### Database
+- install PostgreSQL from https://www.postgresql.org/download/
+- gegebenenfalls Passwort in /backend/.env DATABASE_URL anpassen
+- cd backend
+- psql -U postgres -h localhost -p 5432 -d postgres -c "CREATE SCHEMA IF NOT EXISTS techradar;"
+- npm run db:migrate
+- npm run db:seed
+
+### Backend
+- cd backend
+- npm i
+- npm run start:dev
+
+### Frontend
+- cd frontend
+- npm i
+- ng serve
+
+## Usage
+Aus dem Seed werden bereits zwei Benutzer erstellt, mit denen man sich einloggen kann:
+- cto@example.com --> Rolle CTO
+- emp@example.com --> Rolle Employee
+
+Beide können mit dem Passwort 12345678 eingeloggt werden.
+
+Über http://localhost:4200/viewer kann das Radar aufgerufen werden
+
+Über http://localhost:4200/admin/technologies kann die Admin-Seite aufgerufen werden
+
+## Tests
+### Backend
+- cd backend
+- npm run test
+
+### Frontend
+- cd frontend
+- npm run test
+
+### Cypress
+- frontend & backend starten
+- cd frontend
+- npm run e2e:open
